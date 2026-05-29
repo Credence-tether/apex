@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --teal: #00d1b2;
+  --teal: rgb(226,232,240);
   --teal-dim: #00a89100;
   --bg-deep: #060613;
   --bg-card: #0f0f30;
@@ -83,5 +83,5 @@
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: #060613; }
 ::-webkit-scrollbar-thumb { background: #1e1e38; border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: #00d1b2; }
+::-webkit-scrollbar-thumb:hover { background: rgb(226,232,240); }
 

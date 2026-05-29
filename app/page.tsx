@@ -33,7 +33,7 @@ const PLANS = [
       "No Credit Privileges",
     ],
     accent: "border-teal-500/30",
-    apyColor: "text-[#00d1b2]",
+    apyColor: "text-[rgb(226,232,240)]",
   },
   {
     name: "Amateur Growth",
@@ -46,7 +46,7 @@ const PLANS = [
       "Priority Email Support",
     ],
     accent: "border-teal-400/50",
-    apyColor: "text-[#00d1b2]",
+    apyColor: "text-[rgb(226,232,240)]",
     featured: true,
   },
   {
@@ -60,7 +60,7 @@ const PLANS = [
       "Dedicated Account Node",
     ],
     accent: "border-teal-300/40",
-    apyColor: "text-[#00d1b2]",
+    apyColor: "text-[rgb(226,232,240)]",
   },
   {
     name: "Institutional",
@@ -73,7 +73,7 @@ const PLANS = [
       "Custom Compliance Reports",
     ],
     accent: "border-teal-200/30",
-    apyColor: "text-[#00d1b2]",
+    apyColor: "text-[rgb(226,232,240)]",
   },
 ];
 
@@ -176,7 +176,7 @@ export default function HomePage() {
 
       {/* ── HEADER ── */}
       <header className="bg-[#0b0b20] border-b border-[#1e1e38] px-6 py-6 text-center">
-        <h1 className="font-syne text-3xl font-extrabold tracking-widest text-[#00d1b2] uppercase">
+        <h1 className="font-syne text-3xl font-extrabold tracking-widest text-[rgb(226,232,240)] uppercase">
           Apex Asset Management
         </h1>
         <p className="text-xs text-gray-500 mt-1 tracking-widest uppercase">
@@ -191,14 +191,14 @@ export default function HomePage() {
             <a
               key={link.href}
               href={link.href}
-              className="text-sm text-gray-400 hover:text-[#00d1b2] transition-colors duration-200 font-dm"
+              className="text-sm text-gray-400 hover:text-[rgb(226,232,240)] transition-colors duration-200 font-dm"
             >
               {link.label}
             </a>
           ))}
           <a
             href="#calculator"
-            className="text-sm text-[#00d1b2] border border-[#00d1b2]/40 px-3 py-0.5 rounded-full hover:bg-[#00d1b2]/10 transition-all duration-200"
+            className="text-sm text-[rgb(226,232,240)] border border-[rgb(226,232,240)]/40 px-3 py-0.5 rounded-full hover:bg-[rgb(226,232,240)]/10 transition-all duration-200"
           >
             APY Calculator
           </a>
@@ -216,18 +216,18 @@ export default function HomePage() {
           className="absolute inset-0 opacity-5"
           style={{
             backgroundImage:
-              "linear-gradient(#00d1b2 1px, transparent 1px), linear-gradient(90deg, #00d1b2 1px, transparent 1px)",
+              "linear-gradient(rgb(226,232,240) 1px, transparent 1px), linear-gradient(90deg, rgb(226,232,240) 1px, transparent 1px)",
             backgroundSize: "60px 60px",
           }}
         />
         <div className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-block text-xs font-syne tracking-[0.3em] uppercase text-[#00d1b2] mb-6 border border-[#00d1b2]/30 px-4 py-1 rounded-full">
+          <span className="inline-block text-xs font-syne tracking-[0.3em] uppercase text-[rgb(226,232,240)] mb-6 border border-[rgb(226,232,240)]/30 px-4 py-1 rounded-full">
             Institutional-Grade Digital Yield
           </span>
           <h2 className="font-syne text-4xl md:text-6xl font-extrabold leading-tight mb-6">
             Automated Yield Generation
             <br />
-            <span className="text-[#00d1b2]">for Digital Wealth</span>
+            <span className="text-[rgb(226,232,240)]">for Digital Wealth</span>
           </h2>
           <p className="text-lg text-gray-400 max-w-xl mx-auto mb-10 font-dm font-light">
             Access high-tier fixed APY configurations built on verified risk-mitigation frameworks.
@@ -236,13 +236,13 @@ export default function HomePage() {
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <a
               href="#plans"
-              className="bg-[#00d1b2] text-[#060613] font-syne font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-opacity"
+              className="bg-[rgb(226,232,240)] text-[#060613] font-syne font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-opacity"
             >
               View APY Plans
             </a>
             <a
               href="#calculator"
-              className="border border-[#00d1b2]/50 text-[#00d1b2] font-syne font-semibold px-8 py-3 rounded-lg hover:bg-[#00d1b2]/10 transition-all"
+              className="border border-[rgb(226,232,240)]/50 text-[rgb(226,232,240)] font-syne font-semibold px-8 py-3 rounded-lg hover:bg-[rgb(226,232,240)]/10 transition-all"
             >
               Calculate Yield
             </a>
@@ -260,7 +260,7 @@ export default function HomePage() {
               key={stat.label}
               className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl px-6 py-4 text-center min-w-[110px]"
             >
-              <div className="font-syne text-xl font-bold text-[#00d1b2]">{stat.val}</div>
+              <div className="font-syne text-xl font-bold text-[rgb(226,232,240)]">{stat.val}</div>
               <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
             </div>
           ))}
@@ -281,7 +281,7 @@ export default function HomePage() {
               key={step.num}
               className="bg-[#0f0f30]/40 p-8 rounded-xl border border-[#1e1e38]/30"
             >
-              <div className="text-3xl font-bold text-[#00d1b2]/40 font-syne mb-4">
+              <div className="text-3xl font-bold text-[rgb(226,232,240)]/40 font-syne mb-4">
                 {step.num}
               </div>
               <h3 className="text-xl font-bold mb-3">{step.title}</h3>
@@ -304,7 +304,7 @@ export default function HomePage() {
           {PLANS.map((plan) => (
             <div
               key={plan.name}
-              className={`bg-[#0f0f30] p-6 rounded-xl border flex flex-col justify-between transition-all duration-300 hover:border-[#00d1b2]/60 ${plan.accent}`}
+              className={`bg-[#0f0f30] p-6 rounded-xl border flex flex-col justify-between transition-all duration-300 hover:border-[rgb(226,232,240)]/60 ${plan.accent}`}
             >
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">{plan.lock}</p>
@@ -316,7 +316,7 @@ export default function HomePage() {
                 <ul className="space-y-2 mb-6">
                   {plan.perks.map((p) => (
                     <li key={p} className="text-xs text-gray-400 flex items-start gap-2">
-                      <span className="text-[#00d1b2] mt-0.5">✓</span>
+                      <span className="text-[rgb(226,232,240)] mt-0.5">✓</span>
                       {p}
                     </li>
                   ))}
@@ -324,7 +324,7 @@ export default function HomePage() {
               </div>
               <a
                 href="#contact"
-                className="block text-center text-xs font-syne font-bold uppercase tracking-widest border border-[#00d1b2]/40 text-[#00d1b2] py-2 rounded-lg hover:bg-[#00d1b2]/10 transition-all"
+                className="block text-center text-xs font-syne font-bold uppercase tracking-widest border border-[rgb(226,232,240)]/40 text-[rgb(226,232,240)] py-2 rounded-lg hover:bg-[rgb(226,232,240)]/10 transition-all"
               >
                 Request Access
               </a>
@@ -358,7 +358,7 @@ export default function HomePage() {
               key={item.desc}
               className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl px-8 py-6 text-center min-w-[140px]"
             >
-              <div className="font-syne text-2xl font-bold text-[#00d1b2]">{item.val}</div>
+              <div className="font-syne text-2xl font-bold text-[rgb(226,232,240)]">{item.val}</div>
               <div className="text-xs text-gray-500 mt-1">{item.desc}</div>
             </div>
           ))}
@@ -384,7 +384,7 @@ export default function HomePage() {
             <input
               type="number"
               placeholder="e.g. 5000"
-              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[#00d1b2]/60"
+              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[rgb(226,232,240)]/60"
               value={balance}
               onChange={(e) => setBalance(e.target.value)}
             />
@@ -397,7 +397,7 @@ export default function HomePage() {
               type="number"
               step="0.1"
               placeholder="e.g. 11.4"
-              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[#00d1b2]/60"
+              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[rgb(226,232,240)]/60"
               value={apy}
               onChange={(e) => setApy(e.target.value)}
             />
@@ -405,7 +405,7 @@ export default function HomePage() {
           <button
             onClick={handleCalculate}
             disabled={loading}
-            className="w-full bg-[#00d1b2] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
+            className="w-full bg-[rgb(226,232,240)] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50"
           >
             {loading ? "Running Calculations..." : "Execute Simulation"}
           </button>
@@ -425,7 +425,7 @@ export default function HomePage() {
                   key={item.label}
                   className="bg-[#060613] border border-[#1e1e38] rounded-lg p-4 text-center"
                 >
-                  <div className="font-syne text-lg font-bold text-[#00d1b2]">{item.val}</div>
+                  <div className="font-syne text-lg font-bold text-[rgb(226,232,240)]">{item.val}</div>
                   <div className="text-xs text-gray-500 mt-1">{item.label}</div>
                 </div>
               ))}
@@ -451,7 +451,7 @@ export default function HomePage() {
               }`}
             >
               <span className="text-gray-400">{fee.label}</span>
-              <span className="font-syne font-bold text-[#00d1b2]">{fee.value}</span>
+              <span className="font-syne font-bold text-[rgb(226,232,240)]">{fee.value}</span>
             </div>
           ))}
         </div>
@@ -488,7 +488,7 @@ export default function HomePage() {
               key={item.title}
               className="bg-[#0f0f30]/40 border border-[#1e1e38]/30 rounded-xl p-6"
             >
-              <h3 className="font-syne font-bold text-lg mb-2 text-[#00d1b2]">{item.title}</h3>
+              <h3 className="font-syne font-bold text-lg mb-2 text-[rgb(226,232,240)]">{item.title}</h3>
               <p className="text-sm text-gray-400 leading-relaxed">{item.body}</p>
             </div>
           ))}
@@ -512,7 +512,7 @@ export default function HomePage() {
             <input
               type="text"
               required
-              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[#00d1b2]/60"
+              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[rgb(226,232,240)]/60"
               value={name}
               onChange={(e) => setName(e.target.value)}
             />
@@ -524,7 +524,7 @@ export default function HomePage() {
             <input
               type="email"
               required
-              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[#00d1b2]/60"
+              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[rgb(226,232,240)]/60"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -536,14 +536,14 @@ export default function HomePage() {
             <textarea
               required
               rows={4}
-              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[#00d1b2]/60"
+              className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-sm text-white focus:outline-none focus:border-[rgb(226,232,240)]/60"
               value={msg}
               onChange={(e) => setMsg(e.target.value)}
             />
           </div>
           <button
             type="submit"
-            className="w-full bg-[#00d1b2] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity"
+            className="w-full bg-[rgb(226,232,240)] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity"
           >
             Submit Official Inquiry
           </button>
