@@ -16,34 +16,18 @@ const dmSans = DM_Sans({
 
 export const metadata: Metadata = {
   title: "Apex | High APY Crypto Wealth & Secured Asset Management",
-  description:
-    "Secure your financial future with Apex. Earn competitive fixed APY distributed weekly and access institutional capital-backed crypto loan options securely.",
-  keywords:
-    "Apex crypto, high APY investing, secure digital assets, crypto asset wealth, institutional crypto loans, transaction processing",
-  robots: "index, follow",
-  alternates: {
-    canonical: "https://apex.vercel.app",
-  },
-  openGraph: {
-    title: "Apex | High APY Crypto Wealth & Secured Asset Management",
-    description:
-      "Access high-tier fixed APY configurations built on verified risk-mitigation frameworks.",
-    type: "website",
-    url: "https://apex.vercel.app",
-  },
+  description: "Secure your financial future with Apex.",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${syne.variable} ${dmSans.variable}`}>
+      <head>
+        <link rel="stylesheet" href="/generated.css" />
+      </head>
       <body className="bg-[#060613] text-gray-100 font-dm antialiased">
         {children}
       </body>
     </html>
   );
 }
-
