@@ -1,0 +1,5 @@
+{"timestamp":"00:00:12.150","source":"Server","level":"LOG","message":"- Experiments (use with caution):"}
+{"timestamp":"00:00:12.151","source":"Server","level":"LOG","message":"  · optimizePackageImports"}
+{"timestamp":"00:00:12.152","source":"Server","level":"LOG","message":""}
+{"timestamp":"00:01:44.419","source":"Server","level":"LOG","message":"○ Compiling / ..."}
+{"timestamp":"00:01:57.477","source":"Browser","level":"INFO","message":"%cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold"}
