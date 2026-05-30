@@ -1,6 +1,9 @@
 "use client";
 import { useState } from "react";
-import { createClient } from "../../utils/supabase/client";
+import {
+  createClient,
+  getSupabaseClientError,
+} from "../../utils/supabase/client";
 import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
@@ -8,6 +11,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [isRegistering, setIsRegistering] = useState(false);
   const [message, setMessage] = useState("");
+  const envError = getSupabaseClientError();
   const supabase = createClient();
   const router = useRouter();
 
@@ -15,24 +19,37 @@ export default function LoginPage() {
     e.preventDefault();
     setMessage("");
 
-    if (isRegistering) {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${location.origin}/auth/callback` },
-      });
-      if (error) setMessage(error.message);
-      else
-        setMessage(
-          "Registration successful! Check your email for verification.",
-        );
-    } else {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) setMessage(error.message);
-      else router.push("/dashboard");
+    if (envError) {
+      setMessage(envError);
+      return;
+    }
+
+    try {
+      if (isRegistering) {
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${location.origin}/auth/callback` },
+        });
+        if (error) setMessage(error.message);
+        else
+          setMessage(
+            "Registration successful! Check your email for verification.",
+          );
+      } else {
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (error) setMessage(error.message);
+        else router.push("/dashboard");
+      }
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "Authentication failed. Please check your Supabase configuration.",
+      );
     }
   };
 
@@ -62,14 +79,17 @@ export default function LoginPage() {
           />
           <button
             type="submit"
-            className="w-full p-3 rounded bg-[#00d1b2] text-[#060613] font-bold"
+            disabled={Boolean(envError)}
+            className={`w-full p-3 rounded bg-[#00d1b2] text-[#060613] font-bold ${envError ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
           >
             {isRegistering ? "Register" : "Sign In"}
           </button>
         </form>
 
-        {message && (
-          <p className="text-sm text-center text-[#00d1b2] mt-4">{message}</p>
+        {(message || envError) && (
+          <p className="text-sm text-center text-[#00d1b2] mt-4">
+            {message || envError}
+          </p>
         )}
 
         <p className="text-sm text-gray-400 text-center mt-6">
