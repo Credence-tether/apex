@@ -92,4 +92,4 @@ export async function GET() {
     { error: "Method not allowed. Use POST." },
     { status: 405 }
   );
-)	
+}
