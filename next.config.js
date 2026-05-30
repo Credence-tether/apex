@@ -4,6 +4,6 @@
 // Turbopack "Invalid distDirRoot" errors during production builds.
 const nextConfig = {
   // add custom config here if needed
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
