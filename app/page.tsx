@@ -124,8 +124,8 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#060613] text-gray-100">
 
       {/* HEADER */}
-      <header className="bg-[#0b0b20] border-b border-[#1e1e38] px-6 py-6 text-center">
-        <h1 className="font-syne text-3xl font-extrabold tracking-widest text-[#e2e8f0] uppercase">
+      <header className="bg-[#0b0b20] border-b border-[#1e1e38] px-4 py-5 text-center">
+        <h1 className="font-syne text-xl sm:text-3xl font-extrabold tracking-widest text-[#e2e8f0] uppercase leading-tight">
           Apex Asset Management
         </h1>
         <p className="text-xs text-gray-500 mt-1 tracking-widest uppercase">
@@ -133,12 +133,12 @@ export default function HomePage() {
         </p>
       </header>
 
-      {/* NAV - now a component with auth buttons */}
+      {/* NAV */}
       <Navbar />
 
       {/* HERO */}
       <section
-        className="relative overflow-hidden px-6 py-28 text-center"
+        className="relative overflow-hidden px-4 py-16 sm:py-28 text-center"
         style={{ background: "radial-gradient(ellipse at 50% 0%, #111135 0%, #060613 70%)" }}
       >
         <div
@@ -149,40 +149,41 @@ export default function HomePage() {
           }}
         />
         <div className="relative z-10 max-w-3xl mx-auto">
-          <span className="inline-block text-xs font-syne tracking-[0.3em] uppercase text-[#e2e8f0] mb-6 border border-[#e2e8f0]/30 px-4 py-1 rounded-full">
+          <span className="inline-block text-xs font-syne tracking-[0.2em] uppercase text-[#e2e8f0] mb-5 border border-[#e2e8f0]/30 px-3 py-1 rounded-full">
             Institutional-Grade Digital Yield
           </span>
-          <h2 className="font-syne text-4xl md:text-6xl font-extrabold leading-tight mb-6">
+          <h2 className="font-syne text-3xl sm:text-5xl md:text-6xl font-extrabold leading-tight mb-5">
             Automated Yield Generation
             <br />
             <span className="text-[#e2e8f0]">for Digital Wealth</span>
           </h2>
-          <p className="text-lg text-gray-400 max-w-xl mx-auto mb-10 font-dm font-light">
+          <p className="text-base text-gray-400 max-w-xl mx-auto mb-8 font-dm font-light leading-relaxed">
             Access high-tier fixed APY configurations built on verified risk-mitigation frameworks.
             Manage digital crypto assets with institutional transparency.
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <a href="#plans"
-              className="bg-[#e2e8f0] text-[#060613] font-syne font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-opacity">
+              className="bg-[#e2e8f0] text-[#060613] font-syne font-bold px-8 py-3 rounded-lg hover:opacity-90 transition-opacity text-sm">
               View APY Plans
             </a>
             <a href="#calculator"
-              className="border border-[#e2e8f0]/50 text-[#e2e8f0] font-syne font-semibold px-8 py-3 rounded-lg hover:bg-[#e2e8f0]/10 transition-all">
+              className="border border-[#e2e8f0]/50 text-[#e2e8f0] font-syne font-semibold px-8 py-3 rounded-lg hover:bg-[#e2e8f0]/10 transition-all text-sm">
               Calculate Yield
             </a>
           </div>
         </div>
 
-        <div className="mt-16 flex flex-wrap justify-center gap-6">
+        {/* STATS */}
+        <div className="mt-12 grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
           {[
             { val: "15.6%", label: "Max APY" },
             { val: "Weekly", label: "Distributions" },
             { val: "50% LTV", label: "Credit Lines" },
-            { val: "Cold Custody", label: "95% of Funds" },
+            { val: "95% Cold", label: "Custody" },
           ].map((stat) => (
             <div key={stat.label}
-              className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl px-6 py-4 text-center min-w-[110px]">
-              <div className="font-syne text-xl font-bold text-[#e2e8f0]">{stat.val}</div>
+              className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl px-4 py-4 text-center">
+              <div className="font-syne text-lg font-bold text-[#e2e8f0]">{stat.val}</div>
               <div className="text-xs text-gray-500 mt-1">{stat.label}</div>
             </div>
           ))}
@@ -190,13 +191,13 @@ export default function HomePage() {
       </section>
 
       {/* HOW IT WORKS */}
-      <section id="how-it-works" className="max-w-5xl mx-auto py-20 px-6 border-t border-[#1e1e38]/40">
-        <h2 className="text-center font-syne text-3xl font-bold mb-12">Operational Architecture</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <section id="how-it-works" className="max-w-5xl mx-auto py-16 px-4 border-t border-[#1e1e38]/40">
+        <h2 className="text-center font-syne text-2xl sm:text-3xl font-bold mb-10">Operational Architecture</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
           {STEPS.map((step) => (
-            <div key={step.num} className="bg-[#0f0f30]/40 p-8 rounded-xl border border-[#1e1e38]/30">
-              <div className="text-3xl font-bold text-[#e2e8f0]/30 font-syne mb-4">{step.num}</div>
-              <h3 className="text-xl font-bold mb-3">{step.title}</h3>
+            <div key={step.num} className="bg-[#0f0f30]/40 p-6 rounded-xl border border-[#1e1e38]/30">
+              <div className="text-2xl font-bold text-[#e2e8f0]/30 font-syne mb-3">{step.num}</div>
+              <h3 className="text-lg font-bold mb-2">{step.title}</h3>
               <p className="text-sm text-gray-400 font-light leading-relaxed">{step.body}</p>
             </div>
           ))}
@@ -204,24 +205,24 @@ export default function HomePage() {
       </section>
 
       {/* PLANS */}
-      <section id="plans" className="max-w-5xl mx-auto py-20 px-6 border-t border-[#1e1e38]/40">
-        <h2 className="text-center font-syne text-3xl font-bold mb-4">Fixed Yield Asset Matrices</h2>
-        <p className="text-center text-sm text-gray-400 mb-12 max-w-md mx-auto">
+      <section id="plans" className="max-w-5xl mx-auto py-16 px-4 border-t border-[#1e1e38]/40">
+        <h2 className="text-center font-syne text-2xl sm:text-3xl font-bold mb-3">Fixed Yield Asset Matrices</h2>
+        <p className="text-center text-sm text-gray-400 mb-10 max-w-md mx-auto">
           Choose a baseline capital configuration tier. Yield settlements processed every Sunday.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {PLANS.map((plan) => (
             <div key={plan.name}
-              className={`bg-[#0f0f30] p-6 rounded-xl border flex flex-col justify-between transition-all duration-300 hover:border-[#e2e8f0]/40 ${plan.accent}`}>
+              className={`bg-[#0f0f30] p-5 rounded-xl border flex flex-col justify-between transition-all duration-300 hover:border-[#e2e8f0]/40 ${plan.accent}`}>
               <div>
                 <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">{plan.lock}</p>
-                <h3 className="font-syne text-lg font-bold mb-2">{plan.name}</h3>
-                <div className="text-3xl font-bold mb-4 font-syne text-[#e2e8f0]">{plan.apy} APY</div>
-                <p className="text-sm text-gray-400 mb-4">{plan.min}</p>
-                <ul className="space-y-2 mb-6">
+                <h3 className="font-syne text-base font-bold mb-1">{plan.name}</h3>
+                <div className="text-2xl font-bold mb-3 font-syne text-[#e2e8f0]">{plan.apy} APY</div>
+                <p className="text-sm text-gray-400 mb-3">{plan.min}</p>
+                <ul className="space-y-2 mb-5">
                   {plan.perks.map((p) => (
                     <li key={p} className="text-xs text-gray-400 flex items-start gap-2">
-                      <span className="text-[#e2e8f0] mt-0.5">✓</span>{p}
+                      <span className="text-[#e2e8f0] mt-0.5 flex-shrink-0">✓</span>{p}
                     </li>
                   ))}
                 </ul>
@@ -236,25 +237,25 @@ export default function HomePage() {
       </section>
 
       {/* CREDIT LINES */}
-      <section id="loans" className="max-w-5xl mx-auto py-20 px-6 border-t border-[#1e1e38]/40">
-        <h2 className="text-center font-syne text-3xl font-bold mb-4">Liquidity Extension</h2>
-        <p className="text-center text-sm text-gray-500 uppercase tracking-widest mb-3">Capital-Backed Credit Lines</p>
-        <p className="text-center text-sm text-gray-400 mb-4 max-w-xl mx-auto">
+      <section id="loans" className="max-w-5xl mx-auto py-16 px-4 border-t border-[#1e1e38]/40">
+        <h2 className="text-center font-syne text-2xl sm:text-3xl font-bold mb-2">Liquidity Extension</h2>
+        <p className="text-center text-sm text-gray-500 uppercase tracking-widest mb-2">Capital-Backed Credit Lines</p>
+        <p className="text-center text-sm text-gray-400 mb-3 max-w-xl mx-auto">
           Maintain active capital placements in the Amateur Growth tier or above to instantly unlock dollar-denominated liquidity facilities.
         </p>
-        <p className="text-center text-xs text-gray-500 mb-12 max-w-lg mx-auto">
+        <p className="text-center text-xs text-gray-500 mb-10 max-w-lg mx-auto">
           Risk/Credit Notice: All credit lines are backed safely 1:1 against your cold custody ledger balances.
         </p>
-        <div className="flex flex-wrap justify-center gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl mx-auto">
           {[
-            { val: "50% LTV", desc: "Max Loan-to-Value Limit" },
+            { val: "50% LTV", desc: "Max Loan-to-Value" },
             { val: "Instant", desc: "Wallet Disbursement" },
             { val: "4.5%", desc: "Fixed Origination Rate" },
             { val: "Flexible", desc: "Repayment Matrix" },
           ].map((item) => (
             <div key={item.desc}
-              className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl px-8 py-6 text-center min-w-[140px]">
-              <div className="font-syne text-2xl font-bold text-[#e2e8f0]">{item.val}</div>
+              className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl px-4 py-5 text-center">
+              <div className="font-syne text-lg font-bold text-[#e2e8f0]">{item.val}</div>
               <div className="text-xs text-gray-500 mt-1">{item.desc}</div>
             </div>
           ))}
@@ -262,10 +263,10 @@ export default function HomePage() {
       </section>
 
       {/* APY CALCULATOR */}
-      <section id="calculator" className="max-w-2xl mx-auto py-20 px-6 border-t border-[#1e1e38]/40">
-        <h2 className="text-center font-syne text-3xl font-bold mb-2">Yield Projection Matrix</h2>
-        <p className="text-center text-sm text-gray-400 mb-10">Run multi-scenario simulations based on target APY allocations</p>
-        <div className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl p-8 space-y-6">
+      <section id="calculator" className="max-w-lg mx-auto py-16 px-4 border-t border-[#1e1e38]/40">
+        <h2 className="text-center font-syne text-2xl sm:text-3xl font-bold mb-2">Yield Projection Matrix</h2>
+        <p className="text-center text-sm text-gray-400 mb-8">Run multi-scenario simulations based on target APY allocations</p>
+        <div className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl p-6 space-y-5">
           <div>
             <label className="block text-xs text-gray-400 uppercase tracking-widest mb-2">Principal Allocation ($)</label>
             <input type="number" placeholder="e.g. 5000"
@@ -279,19 +280,19 @@ export default function HomePage() {
               value={apy} onChange={(e) => setApy(e.target.value)} />
           </div>
           <button onClick={handleCalculate} disabled={loading}
-            className="w-full bg-[#e2e8f0] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50">
+            className="w-full bg-[#e2e8f0] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 text-sm">
             {loading ? "Running Calculations..." : "Execute Simulation"}
           </button>
           {error && <p className="text-red-400 text-sm text-center">{error}</p>}
           {result && (
-            <div className="grid grid-cols-3 gap-4 pt-2">
+            <div className="grid grid-cols-3 gap-3 pt-1">
               {[
-                { label: "Weekly Payout", val: `$${result.weekly_yield.toFixed(2)}` },
-                { label: "Daily Accumulation", val: `$${result.daily_yield.toFixed(2)}` },
-                { label: "12-Month Projection", val: `$${result.projected_annual.toFixed(2)}` },
+                { label: "Weekly", val: `$${result.weekly_yield.toFixed(2)}` },
+                { label: "Daily", val: `$${result.daily_yield.toFixed(2)}` },
+                { label: "Annual", val: `$${result.projected_annual.toFixed(2)}` },
               ].map((item) => (
-                <div key={item.label} className="bg-[#060613] border border-[#1e1e38] rounded-lg p-4 text-center">
-                  <div className="font-syne text-lg font-bold text-[#e2e8f0]">{item.val}</div>
+                <div key={item.label} className="bg-[#060613] border border-[#1e1e38] rounded-lg p-3 text-center">
+                  <div className="font-syne text-base font-bold text-[#e2e8f0]">{item.val}</div>
                   <div className="text-xs text-gray-500 mt-1">{item.label}</div>
                 </div>
               ))}
@@ -301,34 +302,34 @@ export default function HomePage() {
       </section>
 
       {/* FEES */}
-      <section id="fees" className="max-w-2xl mx-auto py-20 px-6 border-t border-[#1e1e38]/40">
-        <h2 className="text-center font-syne text-3xl font-bold mb-3">Protocol Fee Disclosures</h2>
-        <p className="text-center text-sm text-gray-400 mb-10">Transparent fee tracking to protect system asset integrity</p>
+      <section id="fees" className="max-w-lg mx-auto py-16 px-4 border-t border-[#1e1e38]/40">
+        <h2 className="text-center font-syne text-2xl sm:text-3xl font-bold mb-3">Protocol Fee Disclosures</h2>
+        <p className="text-center text-sm text-gray-400 mb-8">Transparent fee tracking to protect system asset integrity</p>
         <div className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl overflow-hidden">
           {FEES.map((fee, i) => (
             <div key={fee.label}
-              className={`flex justify-between items-center px-6 py-4 text-sm ${i < FEES.length - 1 ? "border-b border-[#1e1e38]" : ""}`}>
-              <span className="text-gray-400">{fee.label}</span>
-              <span className="font-syne font-bold text-[#e2e8f0]">{fee.value}</span>
+              className={`flex justify-between items-center px-5 py-4 text-sm gap-4 ${i < FEES.length - 1 ? "border-b border-[#1e1e38]" : ""}`}>
+              <span className="text-gray-400 text-xs leading-relaxed">{fee.label}</span>
+              <span className="font-syne font-bold text-[#e2e8f0] flex-shrink-0">{fee.value}</span>
             </div>
           ))}
         </div>
       </section>
 
       {/* SECURITY */}
-      <section id="security" className="max-w-5xl mx-auto py-20 px-6 border-t border-[#1e1e38]/40">
-        <h2 className="text-center font-syne text-3xl font-bold mb-6">Risk Management Operations</h2>
-        <p className="text-center text-sm text-gray-400 mb-12 max-w-xl mx-auto">
+      <section id="security" className="max-w-5xl mx-auto py-16 px-4 border-t border-[#1e1e38]/40">
+        <h2 className="text-center font-syne text-2xl sm:text-3xl font-bold mb-4">Risk Management Operations</h2>
+        <p className="text-center text-sm text-gray-400 mb-10 max-w-xl mx-auto">
           Apex manages pool parameters using deep encryption layers and strict operational procedures.
         </p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {[
             { title: "Cold Storage", body: "95% of active reserves are retained in isolated multisig custody nodes." },
             { title: "Zero Leveraged Exposure", body: "Fixed yields operate completely inside non-directional liquidity pools." },
             { title: "Audited Ledgers", body: "All tracking events are reconciled via secure server execution loops." },
           ].map((item) => (
-            <div key={item.title} className="bg-[#0f0f30]/40 border border-[#1e1e38]/30 rounded-xl p-6">
-              <h3 className="font-syne font-bold text-lg mb-2 text-[#e2e8f0]">{item.title}</h3>
+            <div key={item.title} className="bg-[#0f0f30]/40 border border-[#1e1e38]/30 rounded-xl p-5">
+              <h3 className="font-syne font-bold text-base mb-2 text-[#e2e8f0]">{item.title}</h3>
               <p className="text-sm text-gray-400 leading-relaxed">{item.body}</p>
             </div>
           ))}
@@ -336,10 +337,10 @@ export default function HomePage() {
       </section>
 
       {/* CONTACT */}
-      <section id="contact" className="max-w-xl mx-auto py-20 px-6 border-t border-[#1e1e38]/40">
-        <h2 className="text-center font-syne text-3xl font-bold mb-3">Corporate Support Gate</h2>
-        <p className="text-center text-sm text-gray-400 mb-10">Submit general ledger inquiries to our internal accounts desk.</p>
-        <form onSubmit={handleFormSubmit} className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl p-8 space-y-6">
+      <section id="contact" className="max-w-lg mx-auto py-16 px-4 border-t border-[#1e1e38]/40">
+        <h2 className="text-center font-syne text-2xl sm:text-3xl font-bold mb-3">Corporate Support Gate</h2>
+        <p className="text-center text-sm text-gray-400 mb-8">Submit general ledger inquiries to our internal accounts desk.</p>
+        <form onSubmit={handleFormSubmit} className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl p-6 space-y-5">
           <div>
             <label className="block text-xs text-gray-400 uppercase tracking-widest mb-2">Legal Full Name</label>
             <input type="text" required
@@ -359,7 +360,7 @@ export default function HomePage() {
               value={msg} onChange={(e) => setMsg(e.target.value)} />
           </div>
           <button type="submit"
-            className="w-full bg-[#e2e8f0] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity">
+            className="w-full bg-[#e2e8f0] text-[#060613] font-syne font-bold py-3 rounded-lg hover:opacity-90 transition-opacity text-sm">
             Submit Official Inquiry
           </button>
           {formStatus && <p className="text-sm text-center text-[#e2e8f0] mt-2">{formStatus}</p>}
@@ -367,9 +368,9 @@ export default function HomePage() {
       </section>
 
       {/* FOOTER */}
-      <footer className="border-t border-[#1e1e38] py-10 text-center text-xs text-gray-600 px-6">
+      <footer className="border-t border-[#1e1e38] py-8 text-center text-xs text-gray-600 px-4">
         <p className="mb-2 font-syne tracking-widest uppercase text-gray-500">Apex Asset Management — APX-2026</p>
-        <p>Apex operates as a closed private template execution interface. Past performance frameworks do not guarantee identical ledger yields.</p>
+        <p className="max-w-md mx-auto leading-relaxed">Apex operates as a closed private template execution interface. Past performance frameworks do not guarantee identical ledger yields.</p>
       </footer>
 
     </div>
