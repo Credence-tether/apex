@@ -2,7 +2,13 @@ import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
 const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+// Prefer a server-side secret if available; fall back to the publishable key
+// for environments that haven't been configured yet. For production, set a
+// service role or server key via SUPABASE_SERVICE_ROLE_KEY and never expose it
+// to the browser.
+const SUPABASE_KEY =
+  process.env.SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 const PLACEHOLDER_URL = "https://your-project.supabase.co";
 const PLACEHOLDER_KEY = "your-publishable-key";
 
@@ -21,7 +27,7 @@ function getSupabaseConfig() {
   ) {
     throw new Error(
       "Supabase server configuration is missing or invalid. " +
-        "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY in .env.local.",
+        "Please set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY (or SUPABASE_SERVICE_ROLE_KEY) in .env.local.",
     );
   }
 
