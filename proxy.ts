@@ -1,8 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PLACEHOLDER_URL = "https://your-project.supabase.co";
-const PLACEHOLDER_KEY = "your-publishable-key";
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
 function isPlaceholder(value?: string, placeholder?: string) {
   return (
@@ -19,14 +19,8 @@ export async function proxy(request: NextRequest) {
     },
   });
 
-  const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const SUPABASE_KEY = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
-
   // If Supabase isn't configured, skip creating the client to avoid server errors.
-  if (
-    isPlaceholder(SUPABASE_URL, PLACEHOLDER_URL) ||
-    isPlaceholder(SUPABASE_KEY, PLACEHOLDER_KEY)
-  ) {
+  if (isPlaceholder(SUPABASE_URL) || isPlaceholder(SUPABASE_KEY)) {
     console.warn(
       "Supabase proxy skipped: NEXT_PUBLIC_SUPABASE_URL or NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY not set or left as placeholder.",
     );
@@ -51,9 +45,6 @@ export async function proxy(request: NextRequest) {
       },
     },
   });
-
-  // This refreshes the session user data safely on page transitions
-  await supabase.auth.getUser();
 
   return response;
 }

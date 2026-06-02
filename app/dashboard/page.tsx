@@ -34,6 +34,22 @@ export default function DashboardPage() {
   // Global Feedback System
   const [message, setMessage] = useState({ text: "", isError: false });
 
+  // Deposit Wallet Addresses by Asset
+  const depositWallets: Record<string, string> = {
+    USDT: "0x742d35Cc6634C0532925a3b844Bc152e1B3f4e6B",
+    USDC: "0x8BA34fd6aC8D3fA6ab4ad64c0c9Cf4df9e4C28B9",
+    BTC: "3J98t1WpEZ73CNmYviecrnyiWrnqRhWNLy",
+    ETH: "0x9876543210ABCDEFabcdef1234567890abcdef12",
+  };
+
+  const [copiedAsset, setCopiedAsset] = useState<string | null>(null);
+
+  function copyToClipboard(address: string, asset: string) {
+    navigator.clipboard.writeText(address);
+    setCopiedAsset(asset);
+    setTimeout(() => setCopiedAsset(null), 2000);
+  }
+
   useEffect(() => {
     fetchDashboardData();
   }, []);
@@ -135,41 +151,59 @@ export default function DashboardPage() {
 
   async function handleWithdrawal(e: React.FormEvent) {
     e.preventDefault();
-    if (!withdrawAmount || !withdrawAddress) return;
-    const { error } = await supabase.from("apex_withdrawals").insert([
-      {
-        user_id: user.id,
-        amount: parseFloat(withdrawAmount),
+    if (
+      !withdrawAmount ||
+      parseFloat(withdrawAmount) <= 0 ||
+      !withdrawAddress
+    ) {
+      showFeedback(
+        "Please provide valid withdrawal amount and wallet address.",
+        true,
+      );
+      return;
+    }
+
+    const res = await fetch("/api/withdraw", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: withdrawAmount,
         wallet_address: withdrawAddress,
         network: withdrawNetwork,
-      },
-    ]);
-    if (error) {
-      showFeedback(error.message, true);
-    } else {
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
       showFeedback("Withdrawal transaction logged.");
       setWithdrawAmount("");
       setWithdrawAddress("");
       fetchDashboardData();
+    } else {
+      showFeedback(data.error, true);
     }
   }
 
   async function handleLoanRequest(e: React.FormEvent) {
     e.preventDefault();
-    if (!loanAmount) return;
-    const principal = parseFloat(loanAmount);
-    const { error } = await supabase.from("apex_loans").insert([
-      {
-        user_id: user.id,
-        loan_principal: principal,
-      },
-    ]);
-    if (error) {
-      showFeedback(error.message, true);
-    } else {
+    if (!loanAmount || parseFloat(loanAmount) <= 0) {
+      showFeedback("Please provide a valid credit draw amount.", true);
+      return;
+    }
+
+    const res = await fetch("/api/loan", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: loanAmount,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
       showFeedback("Asset credit lines requested successfully.");
       setLoanAmount("");
       fetchDashboardData();
+    } else {
+      showFeedback(data.error, true);
     }
   }
 
@@ -345,6 +379,34 @@ export default function DashboardPage() {
                   <option>BTC</option>
                   <option>ETH</option>
                 </select>
+              </div>
+              <div className="bg-[#060613]/80 p-4 rounded-lg border border-[#1e1e38]/50">
+                <label className="block text-[10px] text-gray-400 uppercase mb-2 font-bold">
+                  Deposit Wallet Address
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    readOnly
+                    value={depositWallets[depositAsset] || ""}
+                    className="flex-1 bg-[#0f0f30] border border-[#1e1e38] rounded-lg p-2 text-xs text-[#00d1b2] font-mono cursor-pointer"
+                  />
+                  <button
+                    type="button"
+                    onClick={() =>
+                      copyToClipboard(
+                        depositWallets[depositAsset],
+                        depositAsset,
+                      )
+                    }
+                    className={`px-3 py-2 rounded-lg text-xs font-bold uppercase tracking-wider transition ${copiedAsset === depositAsset ? "bg-green-600/80 text-white" : "bg-[#1e1e38] text-gray-300 hover:bg-[#2a2a50]"}`}
+                  >
+                    {copiedAsset === depositAsset ? "Copied" : "Copy"}
+                  </button>
+                </div>
+                <p className="text-[9px] text-gray-500 mt-2 font-light">
+                  Send {depositAsset} to this address to fund your vault.
+                </p>
               </div>
               <div>
                 <label className="block text-[10px] text-gray-400 uppercase mb-1">
