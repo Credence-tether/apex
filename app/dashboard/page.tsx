@@ -11,8 +11,8 @@ export default function DashboardPage() {
   // Core Data States
   const [user, setUser] = useState<any>(null);
   const [wallet, setWallet] = useState<any>({
-    balance: 0,
-    earnings_to_date: 0,
+    available_balance: 0,
+    total_earnings: 0,
   });
   const [investments, setInvestments] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -138,6 +138,7 @@ export default function DashboardPage() {
     if (!withdrawAmount || !withdrawAddress) return;
     const { error } = await supabase.from("apex_withdrawals").insert([
       {
+        user_id: user.id,
         amount: parseFloat(withdrawAmount),
         wallet_address: withdrawAddress,
         network: withdrawNetwork,
@@ -160,8 +161,7 @@ export default function DashboardPage() {
     const { error } = await supabase.from("apex_loans").insert([
       {
         user_id: user.id,
-        amount_requested: principal,
-        collateral_amount: principal * 2.0,
+        loan_principal: principal,
       },
     ]);
     if (error) {
@@ -225,7 +225,7 @@ export default function DashboardPage() {
               Liquid Vault Balance
             </span>
             <p className="text-4xl font-extrabold mt-2 text-white font-mono">
-              ${wallet.balance.toFixed(2)}
+              ${wallet.available_balance.toFixed(2)}
             </p>
           </div>
           <div className="bg-[#0f0f30] p-6 rounded-xl border border-[#1e1e38]">
@@ -233,7 +233,7 @@ export default function DashboardPage() {
               Sustained APY Distributions
             </span>
             <p className="text-4xl font-extrabold mt-2 text-[#00d1b2] font-mono">
-              ${wallet.earnings_to_date.toFixed(2)}
+              ${wallet.total_earnings.toFixed(2)}
             </p>
           </div>
         </div>
