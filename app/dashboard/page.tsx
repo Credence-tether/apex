@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "../../utils/supabase/client";
 import { useRouter } from "next/navigation";
+import { createClient } from "../../utils/supabase/client";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -16,11 +16,13 @@ export default function DashboardPage() {
   });
   const [investments, setInvestments] = useState<any[]>([]);
   const [transactions, setTransactions] = useState<any[]>([]);
-  const [loans, setLoans] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // Interactive Form States
   const [depositAmount, setDepositAmount] = useState("");
+  const [depositAsset, setDepositAsset] = useState("USDT");
+  const [txHash, setTxHash] = useState("");
+
   const [withdrawAmount, setWithdrawAmount] = useState("");
   const [withdrawAddress, setWithdrawAddress] = useState("");
   const [withdrawNetwork, setWithdrawNetwork] = useState("ERC20");
@@ -64,12 +66,6 @@ export default function DashboardPage() {
         .select("*")
         .order("created_at", { ascending: false });
       setTransactions(txnData || []);
-
-      const { data: loanData } = await supabase
-        .from("apex_loans")
-        .select("*")
-        .order("created_at", { ascending: false });
-      setLoans(loanData || []);
     } catch (err: any) {
       showFeedback(err.message, true);
     } finally {
@@ -84,17 +80,30 @@ export default function DashboardPage() {
 
   async function handleDeposit(e: React.FormEvent) {
     e.preventDefault();
-    if (!depositAmount || parseFloat(depositAmount) <= 0) return;
+    if (!depositAmount || parseFloat(depositAmount) <= 0 || !txHash.trim()) {
+      showFeedback(
+        "Please provide all necessary deposit details and payment hash values.",
+        true,
+      );
+      return;
+    }
 
     const res = await fetch("/api/deposit", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ amount: depositAmount }),
+      body: JSON.stringify({
+        amount: depositAmount,
+        asset_ticker: depositAsset,
+        transaction_hash: txHash,
+      }),
     });
     const data = await res.json();
     if (data.success) {
-      showFeedback("Deposit instruction recorded successfully.");
+      showFeedback(
+        "Inward deposit instruction and transaction hash recorded for processing.",
+      );
       setDepositAmount("");
+      setTxHash("");
       fetchDashboardData();
     } else {
       showFeedback(data.error, true);
@@ -127,7 +136,6 @@ export default function DashboardPage() {
   async function handleWithdrawal(e: React.FormEvent) {
     e.preventDefault();
     if (!withdrawAmount || !withdrawAddress) return;
-
     const { error } = await supabase.from("apex_withdrawals").insert([
       {
         amount: parseFloat(withdrawAmount),
@@ -135,11 +143,10 @@ export default function DashboardPage() {
         network: withdrawNetwork,
       },
     ]);
-
     if (error) {
       showFeedback(error.message, true);
     } else {
-      showFeedback("Withdrawal transaction added to processing pipeline.");
+      showFeedback("Withdrawal transaction logged.");
       setWithdrawAmount("");
       setWithdrawAddress("");
       fetchDashboardData();
@@ -149,21 +156,18 @@ export default function DashboardPage() {
   async function handleLoanRequest(e: React.FormEvent) {
     e.preventDefault();
     if (!loanAmount) return;
-
     const principal = parseFloat(loanAmount);
-    const requiredCollateral = principal * 2.0;
-
     const { error } = await supabase.from("apex_loans").insert([
       {
+        user_id: user.id,
         amount_requested: principal,
-        collateral_amount: requiredCollateral,
+        collateral_amount: principal * 2.0,
       },
     ]);
-
     if (error) {
       showFeedback(error.message, true);
     } else {
-      showFeedback("Asset credit application successfully logged.");
+      showFeedback("Asset credit lines requested successfully.");
       setLoanAmount("");
       fetchDashboardData();
     }
@@ -171,8 +175,8 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#060613] text-gray-100 flex items-center justify-center font-sans tracking-wide">
-        Verifying Secure Administrative Session...
+      <div className="min-h-screen bg-[#060613] text-gray-100 flex items-center justify-center font-sans">
+        Verifying Administrative Session...
       </div>
     );
   }
@@ -180,7 +184,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#060613] text-gray-100 p-6 font-sans">
       <div className="max-w-6xl mx-auto space-y-8">
-        {/* ── CLIENT DASHBOARD HEADER ── */}
+        {/* HEADER */}
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#1e1e38] pb-6 gap-4">
           <div>
             <h1 className="text-3xl font-extrabold text-[#00d1b2] tracking-wider uppercase">
@@ -201,7 +205,7 @@ export default function DashboardPage() {
           </button>
         </header>
 
-        {/* ── FEEDBACK NOTIFICATION ── */}
+        {/* FEEDBACK BANNER */}
         {message.text && (
           <div
             className={`p-4 rounded-xl border text-sm font-semibold tracking-wide ${
@@ -214,9 +218,9 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* ── BALANCE LEDGERS ── */}
+        {/* WALLET SUMMARY CARDS */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-[#0f0f30] p-6 rounded-xl border border-[#1e1e38] shadow-xl">
+          <div className="bg-[#0f0f30] p-6 rounded-xl border border-[#1e1e38]">
             <span className="text-[10px] tracking-[0.2em] text-gray-400 uppercase block font-bold">
               Liquid Vault Balance
             </span>
@@ -224,7 +228,7 @@ export default function DashboardPage() {
               ${wallet.balance.toFixed(2)}
             </p>
           </div>
-          <div className="bg-[#0f0f30] p-6 rounded-xl border border-[#1e1e38] shadow-xl">
+          <div className="bg-[#0f0f30] p-6 rounded-xl border border-[#1e1e38]">
             <span className="text-[10px] tracking-[0.2em] text-[#00d1b2] uppercase block font-bold">
               Sustained APY Distributions
             </span>
@@ -234,9 +238,9 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── OPERATIONAL PANELS ── */}
+        {/* ACTION PANELS */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* APY ALLOCATION INTERFACE */}
+          {/* APY ALLOCATION */}
           <div className="bg-[#0f0f30]/60 p-6 rounded-xl border border-[#1e1e38]/80 space-y-4">
             <h2 className="text-lg font-bold text-white tracking-wide uppercase border-b border-[#1e1e38] pb-2">
               Initialize APY Contract
@@ -252,24 +256,20 @@ export default function DashboardPage() {
                     value={investPlan}
                     onChange={(e) => {
                       setInvestPlan(e.target.value);
-                      if (e.target.value === "Stable-Tier Entry")
+                      if (e.target.value.includes("Stable"))
                         setInvestApy("0.052");
-                      if (e.target.value === "Amateur Growth")
+                      if (e.target.value.includes("Amateur"))
                         setInvestApy("0.078");
-                      if (e.target.value === "Apex Thrive")
+                      if (e.target.value.includes("Thrive"))
                         setInvestApy("0.114");
-                      if (e.target.value === "Institutional")
+                      if (e.target.value.includes("Institutional"))
                         setInvestApy("0.156");
                     }}
                   >
-                    <option value="Stable-Tier Entry">
-                      Stable-Tier Entry (5.2%)
-                    </option>
-                    <option value="Amateur Growth">
-                      Amateur Growth (7.8%)
-                    </option>
-                    <option value="Apex Thrive">Apex Thrive (11.4%)</option>
-                    <option value="Institutional">Institutional (15.6%)</option>
+                    <option>Stable-Tier Entry (5.2%)</option>
+                    <option>Amateur Growth (7.8%)</option>
+                    <option>Apex Thrive (11.4%)</option>
+                    <option>Institutional (15.6%)</option>
                   </select>
                 </div>
                 <div>
@@ -287,14 +287,14 @@ export default function DashboardPage() {
               </div>
               <button
                 type="submit"
-                className="w-full py-2.5 bg-[#00d1b2] text-black font-bold text-xs tracking-widest uppercase rounded-lg hover:bg-[#00b89c] transition"
+                className="w-full py-2.5 rounded-lg bg-[#00d1b2] text-[#060613] text-xs font-bold uppercase tracking-wider"
               >
                 Deploy Allocation
               </button>
             </form>
           </div>
 
-          {/* LIQUIDITY CREDIT INTAKE */}
+          {/* LOAN / CREDIT */}
           <div className="bg-[#0f0f30]/60 p-6 rounded-xl border border-[#1e1e38]/80 space-y-4">
             <h2 className="text-lg font-bold text-white tracking-wide uppercase border-b border-[#1e1e38] pb-2">
               Draw Asset Credit
@@ -306,26 +306,26 @@ export default function DashboardPage() {
                 </label>
                 <input
                   type="number"
-                  placeholder="Draw requirements amount"
+                  placeholder="Draw requirements volume"
                   className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-2 text-xs text-white"
                   value={loanAmount}
                   onChange={(e) => setLoanAmount(e.target.value)}
                 />
               </div>
-              <p className="text-[10px] text-gray-500">
+              <p className="text-[10px] text-gray-500 font-light">
                 Drawings enforce a structural 50% LTV logic. Requested credit
                 requires double its value in active vault assets.
               </p>
               <button
                 type="submit"
-                className="w-full py-2.5 bg-[#1e1e38] text-white font-bold text-xs tracking-widest uppercase rounded-lg hover:bg-[#2a2a50] transition"
+                className="w-full py-2.5 rounded-lg bg-[#1e1e38] text-white text-xs font-bold uppercase tracking-wider hover:bg-[#2a2a50] transition"
               >
                 Submit Credit Query
               </button>
             </form>
           </div>
 
-          {/* FUNDING GATEWAY */}
+          {/* DEPOSIT */}
           <div className="bg-[#0f0f30]/60 p-6 rounded-xl border border-[#1e1e38]/80 space-y-4">
             <h2 className="text-lg font-bold text-white tracking-wide uppercase border-b border-[#1e1e38] pb-2">
               Inward Vault Funding
@@ -333,26 +333,54 @@ export default function DashboardPage() {
             <form onSubmit={handleDeposit} className="space-y-4">
               <div>
                 <label className="block text-[10px] text-gray-400 uppercase mb-1">
+                  Asset Token
+                </label>
+                <select
+                  className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-2.5 text-xs text-white"
+                  value={depositAsset}
+                  onChange={(e) => setDepositAsset(e.target.value)}
+                >
+                  <option>USDT</option>
+                  <option>USDC</option>
+                  <option>BTC</option>
+                  <option>ETH</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] text-gray-400 uppercase mb-1">
                   Target Statement Amount ($)
                 </label>
                 <input
                   type="number"
-                  placeholder="Amount to deposit"
+                  placeholder="Volume amount"
                   className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-2 text-xs text-white"
                   value={depositAmount}
                   onChange={(e) => setDepositAmount(e.target.value)}
                 />
               </div>
+              <div>
+                <label className="block text-[10px] text-gray-400 uppercase mb-1">
+                  Blockchain Transaction Hash (TxID)
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Paste network transaction receipt hash"
+                  className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-2 text-xs text-white placeholder-gray-600 font-mono"
+                  value={txHash}
+                  onChange={(e) => setTxHash(e.target.value)}
+                />
+              </div>
               <button
                 type="submit"
-                className="w-full py-2.5 bg-[#1e1e38] text-white font-bold text-xs tracking-widest uppercase rounded-lg hover:bg-[#2a2a50] transition"
+                className="w-full py-2.5 rounded-lg bg-[#00d1b2] text-[#060613] text-xs font-bold uppercase tracking-wider"
               >
-                Generate Invoice
+                Submit Deposit Receipt
               </button>
             </form>
           </div>
 
-          {/* OUTWARD PROCESSING DECK */}
+          {/* WITHDRAWAL */}
           <div className="bg-[#0f0f30]/60 p-6 rounded-xl border border-[#1e1e38]/80 space-y-4">
             <h2 className="text-lg font-bold text-white tracking-wide uppercase border-b border-[#1e1e38] pb-2">
               Outward Settlement Gateway
@@ -364,7 +392,7 @@ export default function DashboardPage() {
                 </label>
                 <input
                   type="text"
-                  placeholder="Paste corporate crypto address"
+                  placeholder="Paste external crypto wallet"
                   className="w-full bg-[#060613] border border-[#1e1e38] rounded-lg p-2 text-xs text-white"
                   value={withdrawAddress}
                   onChange={(e) => setWithdrawAddress(e.target.value)}
@@ -379,9 +407,9 @@ export default function DashboardPage() {
                   value={withdrawNetwork}
                   onChange={(e) => setWithdrawNetwork(e.target.value)}
                 >
-                  <option value="ERC20">ERC20</option>
-                  <option value="TRC20">TRC20</option>
-                  <option value="BSC">BSC</option>
+                  <option>ERC20</option>
+                  <option>TRC20</option>
+                  <option>BSC</option>
                 </select>
               </div>
               <div>
@@ -398,7 +426,7 @@ export default function DashboardPage() {
               </div>
               <button
                 type="submit"
-                className="w-full py-2.5 bg-red-900/60 text-red-300 font-bold text-xs tracking-widest uppercase rounded-lg hover:bg-red-800/80 transition"
+                className="w-full py-2.5 rounded-lg bg-red-900/60 text-red-300 border border-red-500/30 text-xs font-bold uppercase tracking-wider hover:bg-red-800/60 transition"
               >
                 Execute Settlement
               </button>
@@ -406,38 +434,39 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* ── DATA TABLES ── */}
-
-        {/* ACTIVE ALLOCATIONS */}
+        {/* INVESTMENTS TABLE */}
         <div className="bg-[#0f0f30]/60 p-6 rounded-xl border border-[#1e1e38]/80 space-y-4">
           <h2 className="text-lg font-bold text-white tracking-wide uppercase border-b border-[#1e1e38] pb-2">
             Active Allocation Ledgers
           </h2>
           {investments.length === 0 ? (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 italic">
               No active yield matrix configurations mapped.
             </p>
           ) : (
             <table className="w-full text-xs text-gray-300">
               <thead>
-                <tr className="text-[10px] text-gray-500 uppercase border-b border-[#1e1e38]">
-                  <th className="text-left py-2 pr-4">Structure Plan</th>
-                  <th className="text-left py-2 pr-4">Principal Allocation</th>
-                  <th className="text-left py-2 pr-4">Configured Matrix</th>
+                <tr className="text-[10px] text-gray-500 uppercase tracking-widest border-b border-[#1e1e38]">
+                  <th className="text-left py-2">Structure Plan</th>
+                  <th className="text-left py-2">Principal Allocation</th>
+                  <th className="text-left py-2">Configured Matrix</th>
                   <th className="text-left py-2">System Status</th>
                 </tr>
               </thead>
               <tbody>
                 {investments.map((inv) => (
-                  <tr key={inv.id} className="border-b border-[#1e1e38]/50">
-                    <td className="py-2 pr-4">{inv.plan_name}</td>
-                    <td className="py-2 pr-4">
+                  <tr
+                    key={inv.id}
+                    className="border-b border-[#1e1e38]/50 hover:bg-white/5"
+                  >
+                    <td className="py-2">{inv.plan_name}</td>
+                    <td className="py-2">
                       ${Number(inv.amount_invested).toFixed(2)}
                     </td>
-                    <td className="py-2 pr-4">
+                    <td className="py-2">
                       {(Number(inv.apy_percentage) * 100).toFixed(1)}% APY
                     </td>
-                    <td className="py-2">{inv.status}</td>
+                    <td className="py-2 text-[#00d1b2]">{inv.status}</td>
                   </tr>
                 ))}
               </tbody>
@@ -445,52 +474,54 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* TRANSACTION HISTORY */}
+        {/* TRANSACTIONS TABLE */}
         <div className="bg-[#0f0f30]/60 p-6 rounded-xl border border-[#1e1e38]/80 space-y-4">
           <h2 className="text-lg font-bold text-white tracking-wide uppercase border-b border-[#1e1e38] pb-2">
             Account Ledger Audit Trail
           </h2>
           {transactions.length === 0 ? (
-            <p className="text-xs text-gray-500">
+            <p className="text-xs text-gray-500 italic">
               No transaction log entries found for this node framework.
             </p>
           ) : (
-            <div className="space-y-2">
-              {transactions.map((txn) => (
-                <div
-                  key={txn.id}
-                  className="flex justify-between items-center border-b border-[#1e1e38]/50 py-2 text-xs"
-                >
-                  <div>
-                    <p className="font-semibold text-white capitalize">
-                      {txn.type}
-                    </p>
-                    <p className="text-gray-500">
-                      {txn.description || "System accounting allocation."}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`font-bold ${
-                        txn.type.includes("payout") ||
-                        txn.type.includes("disbursement")
-                          ? "text-[#00d1b2]"
-                          : "text-gray-400"
-                      }`}
+            <table className="w-full text-xs text-gray-300">
+              <thead>
+                <tr className="text-[10px] text-gray-500 uppercase tracking-widest border-b border-[#1e1e38]">
+                  <th className="text-left py-2">Type</th>
+                  <th className="text-left py-2">Description</th>
+                  <th className="text-left py-2">Amount</th>
+                  <th className="text-left py-2">Date</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transactions.map((txn) => {
+                  const isCredit =
+                    txn.type.includes("payout") ||
+                    txn.type.includes("disbursement");
+                  return (
+                    <tr
+                      key={txn.id}
+                      className="border-b border-[#1e1e38]/50 hover:bg-white/5"
                     >
-                      {txn.type.includes("payout") ||
-                      txn.type.includes("disbursement")
-                        ? "+"
-                        : "-"}
-                      ${Number(txn.amount).toFixed(2)}
-                    </p>
-                    <p className="text-gray-600">
-                      {new Date(txn.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
+                      <td className="py-2 uppercase tracking-wide">
+                        {txn.type}
+                      </td>
+                      <td className="py-2 text-gray-500">
+                        {txn.description || "System accounting allocation."}
+                      </td>
+                      <td
+                        className={`py-2 font-bold ${isCredit ? "text-[#00d1b2]" : "text-gray-400"}`}
+                      >
+                        {isCredit ? "+" : "-"}${Number(txn.amount).toFixed(2)}
+                      </td>
+                      <td className="py-2 text-gray-500">
+                        {new Date(txn.created_at).toLocaleDateString()}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           )}
         </div>
       </div>
