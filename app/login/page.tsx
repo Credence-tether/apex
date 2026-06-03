@@ -1,109 +1,104 @@
-"use client";
-import { useState } from "react";
-import {
-  createClient,
-  getSupabaseClientError,
-} from "../../utils/supabase/client";
-import { useRouter } from "next/navigation";
+'use client'
+import { useState } from 'react'
+import { createClient, getSupabaseClientError } from '../../utils/supabase/client'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isRegistering, setIsRegistering] = useState(false);
-  const [message, setMessage] = useState("");
-  const envError = getSupabaseClientError();
-  const supabase = createClient();
-  const router = useRouter();
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [isRegistering, setIsRegistering] = useState(false)
+  const [message, setMessage] = useState('')
+  const [loading, setLoading] = useState(false)
+  const envError = getSupabaseClientError()
+  const supabase = createClient()
+  const router = useRouter()
 
   const handleAuth = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setMessage("");
+    e.preventDefault()
+    setMessage('')
+    setLoading(true)
 
-    if (envError) {
-      setMessage(envError);
-      return;
-    }
+    if (envError) { setMessage(envError); setLoading(false); return }
 
     try {
       if (isRegistering) {
         const { error } = await supabase.auth.signUp({
-          email,
-          password,
+          email, password,
           options: { emailRedirectTo: `${location.origin}/auth/callback` },
-        });
-        if (error) setMessage(error.message);
-        else
-          setMessage(
-            "Registration successful! Check your email for verification.",
-          );
+        })
+        if (error) setMessage(error.message)
+        else setMessage('Registration successful! Check your email for verification.')
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        if (error) setMessage(error.message);
-        else router.push("/dashboard");
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+        if (error) { setMessage(error.message); setLoading(false); return }
+
+        // Role-based redirect
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('user_role')
+          .eq('user_id', data.user.id)
+          .single()
+
+        const target = profile?.user_role === 'admin' ? '/admin' : '/dashboard'
+        router.push(target)
+        return
       }
     } catch (error) {
-      setMessage(
-        error instanceof Error
-          ? error.message
-          : "Authentication failed. Please check your Supabase configuration.",
-      );
+      setMessage(error instanceof Error ? error.message : 'Authentication failed.')
     }
-  };
+    setLoading(false)
+  }
 
   return (
     <main className="min-h-screen bg-[#060613] flex items-center justify-center p-4">
       <div className="bg-[#0f0f30] p-8 rounded-xl border border-[#1e1e38] w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-white mb-6">
-          {isRegistering ? "Create Apex Account" : "Access Client Portal"}
-        </h2>
+        <div className="text-center mb-8">
+          <h1 className="text-2xl font-black text-[#00d1b2] tracking-widest uppercase">APEX</h1>
+          <p className="text-xs text-gray-500 mt-1 tracking-wide">
+            {isRegistering ? 'Create Your Account' : 'Access Client Portal'}
+          </p>
+        </div>
 
         <form onSubmit={handleAuth} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email Address"
-            required
-            className="w-full p-3 rounded bg-[#09091f] border border-[#1e1e38] text-white"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            required
-            className="w-full p-3 rounded bg-[#09091f] border border-[#1e1e38] text-white"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+          <div>
+            <label className="block text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Email Address</label>
+            <input
+              type="email" required
+              className="w-full p-3 rounded-lg bg-[#09091f] border border-[#1e1e38] text-white text-sm focus:border-[#00d1b2] focus:outline-none transition"
+              value={email} onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] text-gray-400 uppercase mb-1 tracking-wider">Password</label>
+            <input
+              type="password" required
+              className="w-full p-3 rounded-lg bg-[#09091f] border border-[#1e1e38] text-white text-sm focus:border-[#00d1b2] focus:outline-none transition"
+              value={password} onChange={(e) => setPassword(e.target.value)}
+            />
+          </div>
           <button
             type="submit"
-            disabled={Boolean(envError)}
-            className={`w-full p-3 rounded bg-[#00d1b2] text-[#060613] font-bold ${envError ? "opacity-50 cursor-not-allowed" : "hover:opacity-90"}`}
+            disabled={Boolean(envError) || loading}
+            className="w-full p-3 rounded-lg bg-[#00d1b2] text-[#060613] font-bold text-sm uppercase tracking-wider hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition mt-2"
           >
-            {isRegistering ? "Register" : "Sign In"}
+            {loading ? 'Verifying...' : isRegistering ? 'Register' : 'Sign In'}
           </button>
         </form>
 
         {(message || envError) && (
-          <p className="text-sm text-center text-[#00d1b2] mt-4">
+          <div className={`mt-4 p-3 rounded-lg text-sm text-center ${message.includes('successful') ? 'bg-teal-950/40 text-[#00d1b2] border border-[#00d1b2]/30' : 'bg-red-950/40 text-red-400 border border-red-500/30'}`}>
             {message || envError}
-          </p>
+          </div>
         )}
 
         <p className="text-sm text-gray-400 text-center mt-6">
-          {isRegistering
-            ? "Already have an account?"
-            : "New to Apex Asset Management?"}
-          <button
-            onClick={() => setIsRegistering(!isRegistering)}
-            className="text-[#00d1b2] ml-1 underline bg-transparent border-none cursor-pointer"
-          >
-            {isRegistering ? "Sign In Here" : "Create Account"}
+          {isRegistering ? 'Already have an account?' : 'New to Apex Asset Management?'}
+          <button onClick={() => { setIsRegistering(!isRegistering); setMessage('') }}
+            className="text-[#00d1b2] ml-1 underline bg-transparent border-none cursor-pointer">
+            {isRegistering ? 'Sign In Here' : 'Create Account'}
           </button>
         </p>
       </div>
     </main>
-  );
+  )
 }
