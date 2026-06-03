@@ -72,32 +72,32 @@ export default function DashboardPage() {
         supabase
           .from("profiles")
           .select("*")
-          .eq("user_id", sessionUser.id)
+          .eq("id", sessionUser.id)
           .single(),
         supabase
           .from("apex_wallets")
           .select("*")
-          .eq("user_id", sessionUser.id)
+          .eq("id", sessionUser.id)
           .maybeSingle(),
         supabase
           .from("apex_investments")
           .select("*")
-          .eq("user_id", sessionUser.id)
+          .eq("id", sessionUser.id)
           .order("created_at", { ascending: false }),
         supabase
           .from("apex_deposit_requests")
           .select("*")
-          .eq("user_id", sessionUser.id)
+          .eq("id", sessionUser.id)
           .order("created_at", { ascending: false }),
         supabase
           .from("apex_transactions")
           .select("*")
-          .eq("user_id", sessionUser.id)
+          .eq("id", sessionUser.id)
           .order("created_at", { ascending: false }),
         supabase
           .from("apex_loans")
           .select("*")
-          .eq("user_id", sessionUser.id)
+          .eq("id", sessionUser.id)
           .order("created_at", { ascending: false }),
       ]);
 
@@ -242,25 +242,6 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-[#060613] text-gray-100 font-sans">
       {/* HEADER */}
-      <header className="border-b border-[#1e1e38] bg-[#07071a] px-6 py-4 flex justify-between items-center sticky top-0 z-10">
-        <div>
-          <h1 className="text-lg font-black text-[#00d1b2] tracking-widest uppercase">
-            APEX
-          </h1>
-          <p className="text-[10px] text-gray-600 font-mono">
-            {profile?.full_name || user?.email}
-          </p>
-        </div>
-        <button
-          onClick={async () => {
-            await supabase.auth.signOut();
-            router.push("/login");
-          }}
-          className="px-4 py-2 border border-red-500/40 text-red-400 rounded-lg text-xs font-bold tracking-widest uppercase hover:bg-red-500/10 transition"
-        >
-          Sign Out
-        </button>
-      </header>
 
       {/* FEEDBACK */}
       {message.text && (
