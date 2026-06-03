@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { createClient } from "../../../../utils/supabase/server";
+import { createClient, createAdminClient } from "../../../../utils/supabase/server";
 
-async function requireAdmin(supabase: any) {
+async function requireAdmin(supabase: any, authSupabase: any) {
   const {
     data: { user },
-  } = await supabase.auth.getUser();
+  } = await authSupabase.auth.getUser();
   if (!user) return null;
   const { data: profile } = await supabase
     .from("profiles")
@@ -16,8 +16,9 @@ async function requireAdmin(supabase: any) {
 }
 
 export async function GET() {
-  const supabase = await createClient();
-  const adminUser = await requireAdmin(supabase);
+  const supabase = await createAdminClient();
+  const authClient = await createClient();
+  const adminUser = await requireAdmin(supabase, authClient);
   if (!adminUser)
     return NextResponse.json(
       { success: false, error: "Unauthorized" },
@@ -73,8 +74,9 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const supabase = await createClient();
-  const adminUser = await requireAdmin(supabase);
+  const supabase = await createAdminClient();
+  const authClient = await createClient();
+  const adminUser = await requireAdmin(supabase, authClient);
   if (!adminUser)
     return NextResponse.json(
       { success: false, error: "Unauthorized" },

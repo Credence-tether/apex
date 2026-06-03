@@ -241,6 +241,26 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#060613] text-gray-100 font-sans">
+      {/* DASHBOARD HEADER */}
+      <header className="sticky top-0 z-10 bg-[#07071a] border-b border-[#1e1e38] px-6 py-4 flex justify-between items-center">
+        <div>
+          <h1 className="text-lg font-black text-[#00d1b2] tracking-widest uppercase">APEX</h1>
+          <p className="text-[10px] text-gray-500 font-mono">{profile?.full_name || user?.email}</p>
+        </div>
+        <div className="flex items-center gap-3">
+          {profile?.user_role === 'admin' && (
+            <a href="/admin" className="text-xs border border-red-900/50 px-3 py-2 rounded text-red-400 hover:bg-red-900/20 transition uppercase tracking-wider">
+              Admin Board
+            </a>
+          )}
+          <button
+            onClick={async () => { await supabase.auth.signOut(); router.push('/login'); }}
+            className="px-4 py-2 border border-red-500/40 text-red-400 rounded-lg text-xs font-bold tracking-widest uppercase hover:bg-red-500/10 transition"
+          >
+            Sign Out
+          </button>
+        </div>
+      </header>
       {/* HEADER */}
 
       {/* FEEDBACK */}
