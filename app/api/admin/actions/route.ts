@@ -35,27 +35,27 @@ export async function GET() {
   ] = await Promise.all([
     supabase
       .from("apex_deposit_requests")
-      .select("*, profiles(full_name)")
+      .select("*")
       .order("created_at", { ascending: false }),
     supabase
       .from("apex_withdrawals")
-      .select("*, profiles(full_name)")
+      .select("*")
       .order("created_at", { ascending: false }),
     supabase
       .from("apex_loans")
-      .select("*, profiles(full_name)")
+      .select("*")
       .order("created_at", { ascending: false }),
     supabase
       .from("profiles")
-      .select("*, apex_wallets(available_balance, total_earnings)")
+      .select("*")
       .order("created_at", { ascending: false }),
     supabase
       .from("apex_investments")
-      .select("*, profiles(full_name)")
+      .select("*")
       .order("created_at", { ascending: false }),
     supabase
       .from("apex_transactions")
-      .select("*, profiles(full_name)")
+      .select("*")
       .order("created_at", { ascending: false })
       .limit(100),
   ]);
