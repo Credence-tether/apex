@@ -49,9 +49,9 @@ export async function POST(request: Request) {
     await supabase.from('apex_transactions').insert([{
       user_id: user.id,
       type: 'investment_entry',
-      gross_amount: allocationAmount,
-      net_amount: allocationAmount,
-      platform_fee: 0,
+      amount: allocationAmount,
+      amount: allocationAmount,
+      fee: 0,
       status: 'completed',
       description: `Allocated to ${plan_name}`,
     }])

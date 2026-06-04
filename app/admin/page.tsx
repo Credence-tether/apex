@@ -235,7 +235,7 @@ export default function AdminDashboard() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-3 mb-1">
                         <p className="text-white font-bold text-sm">
-                          ${Number(dep.amount_deposited).toFixed(2)}
+                          ${Number(dep.amount).toFixed(2)}
                         </p>
                         <span className="text-gray-500 text-xs">
                           {dep.asset_ticker || "USDT"}
@@ -398,7 +398,7 @@ export default function AdminDashboard() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-1">
                         <p className="text-white font-bold text-sm">
-                          ${Number(loan.loan_principal).toFixed(2)}
+                          ${Number(loan.amount).toFixed(2)}
                         </p>
                         <span className={statusBadge(loan.status)}>
                           {loan.status}
@@ -657,17 +657,17 @@ export default function AdminDashboard() {
                           >
                             {isCredit ? "+" : "-"}$
                             {Number(
-                              txn.gross_amount || txn.amount || 0,
+                              txn.amount || txn.amount || 0,
                             ).toFixed(2)}
                           </td>
                           <td className="py-3 px-2 font-mono text-gray-300">
                             $
-                            {Number(txn.net_amount || txn.amount || 0).toFixed(
+                            {Number(txn.amount || txn.amount || 0).toFixed(
                               2,
                             )}
                           </td>
                           <td className="py-3 px-2 font-mono text-gray-500">
-                            ${Number(txn.platform_fee || 0).toFixed(2)}
+                            ${Number(txn.fee || 0).toFixed(2)}
                           </td>
                           <td className="py-3 px-2">
                             <span

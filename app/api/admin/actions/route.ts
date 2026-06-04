@@ -127,14 +127,14 @@ export async function POST(request: Request) {
           .update({
             available_balance:
               Number(wallet.available_balance) +
-              Number(deposit.amount_deposited),
+              Number(deposit.amount),
           })
           .eq("user_id", deposit.user_id);
       } else {
         await supabase.from("apex_wallets").insert([
           {
             user_id: deposit.user_id,
-            available_balance: Number(deposit.amount_deposited),
+            available_balance: Number(deposit.amount),
             total_earnings: 0,
             locked_collateral: 0,
           },
@@ -145,9 +145,9 @@ export async function POST(request: Request) {
         {
           user_id: deposit.user_id,
           type: "deposit",
-          gross_amount: deposit.amount_deposited,
-          net_amount: deposit.amount_deposited,
-          platform_fee: 0,
+          amount: deposit.amount,
+          amount: deposit.amount,
+          fee: 0,
           status: "completed",
           description: `Deposit approved: ${deposit.asset_ticker || "USDT"} via ${deposit.transaction_hash}`,
         },
@@ -232,14 +232,14 @@ export async function POST(request: Request) {
           .from("apex_wallets")
           .update({
             available_balance:
-              Number(wallet.available_balance) + Number(loan.loan_principal),
+              Number(wallet.available_balance) + Number(loan.amount),
           })
           .eq("user_id", loan.user_id);
       } else {
         await supabase.from("apex_wallets").insert([
           {
             user_id: loan.user_id,
-            available_balance: Number(loan.loan_principal),
+            available_balance: Number(loan.amount),
             total_earnings: 0,
             locked_collateral: 0,
           },
@@ -256,9 +256,9 @@ export async function POST(request: Request) {
         {
           user_id: loan.user_id,
           type: "disbursement",
-          gross_amount: loan.loan_principal,
-          net_amount: loan.loan_principal,
-          platform_fee: 0,
+          amount: loan.amount,
+          amount: loan.amount,
+          fee: 0,
           status: "completed",
           description: `Loan disbursement approved`,
         },
@@ -308,9 +308,9 @@ export async function POST(request: Request) {
         {
           user_id,
           type: "admin_credit",
-          gross_amount: amount,
-          net_amount: amount,
-          platform_fee: 0,
+          amount: amount,
+          amount: amount,
+          fee: 0,
           status: "completed",
           description: `Manual balance credit by admin`,
         },

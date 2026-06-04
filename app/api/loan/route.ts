@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       {
         user_id: user.id,
         investment_id: activeInvestmentId,
-        loan_principal: principal,
+        amount: principal,
         status: "active",
       },
     ]);

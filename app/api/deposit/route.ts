@@ -19,7 +19,7 @@ export async function POST(request: Request) {
 
     const { error } = await supabase.from('apex_deposit_requests').insert([{
       user_id: user.id,
-      amount_deposited: parsedAmount,
+      amount: parsedAmount,
       status: 'pending',
       asset_ticker: asset_ticker || 'USDT',
       transaction_hash: transaction_hash.trim(),

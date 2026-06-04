@@ -390,7 +390,7 @@ export default function DashboardPage() {
                     >
                       <div>
                         <p className="text-white text-sm font-semibold">
-                          ${Number(dep.amount_deposited).toFixed(2)}{" "}
+                          ${Number(dep.amount).toFixed(2)}{" "}
                           <span className="text-gray-500 text-xs">
                             {dep.asset_ticker}
                           </span>
@@ -755,7 +755,7 @@ export default function DashboardPage() {
                     >
                       <div>
                         <p className="text-white text-sm font-semibold">
-                          ${Number(loan.loan_principal).toFixed(2)}
+                          ${Number(loan.amount).toFixed(2)}
                         </p>
                         {loan.total_due && (
                           <p className="text-gray-500 text-[10px]">
@@ -821,7 +821,7 @@ export default function DashboardPage() {
                             >
                               {isCredit ? "+" : "-"}$
                               {Number(
-                                txn.net_amount || txn.gross_amount || 0,
+                                txn.amount || txn.amount || 0,
                               ).toFixed(2)}
                             </td>
                             <td className="py-2.5 px-2">
