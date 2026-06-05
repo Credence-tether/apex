@@ -61,8 +61,15 @@ export async function createClient() {
 
 export async function createAdminClient() {
   const { createClient } = await import("@supabase/supabase-js");
+
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      "SUPABASE_SERVICE_ROLE_KEY is required for admin server operations.",
+    );
+  }
+
   return createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.SUPABASE_SERVICE_ROLE_KEY!
+    process.env.SUPABASE_SERVICE_ROLE_KEY,
   );
 }

@@ -6,107 +6,86 @@ export async function POST(request: Request) {
     const { amount } = await request.json();
     const principal = parseFloat(amount);
 
-    console.log("[POST /api/loan] Request received", { principal });
-
-    if (isNaN(principal) || principal <= 0) {
-      console.warn("[POST /api/loan] Invalid loan amount:", principal);
+    if (isNaN(principal) || principal <= 0)
       return NextResponse.json(
         { success: false, error: "Invalid credit draw amount" },
         { status: 400 },
       );
-    }
 
     const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
-
-    if (!user) {
-      console.warn("[POST /api/loan] Unauthorized access attempt");
+    if (!user)
       return NextResponse.json(
         { success: false, error: "Unauthorized" },
         { status: 401 },
       );
-    }
 
-    // Fetch user's active investments
+    // Verify user has an approved investment (investment_purchase with status='approved')
     const { data: investments, error: investErr } = await supabase
-      .from("apex_investments")
+      .from("apex_master_requests")
       .select("id")
       .eq("user_id", user.id)
-      .eq("status", "active")
+      .eq("request_type", "investment_purchase")
+      .eq("status", "approved")
       .order("created_at", { ascending: false });
 
-    if (investErr || !investments || investments.length === 0) {
-      console.warn("[POST /api/loan] No active investments for user:", user.id);
+    if (investErr || !investments || investments.length === 0)
       return NextResponse.json(
         {
           success: false,
-          error: "You must have an active investment to request credit lines.",
+          error:
+            "You must have an approved investment to request credit lines.",
         },
         { status: 400 },
       );
-    }
 
-    const activeInvestmentId = investments[0].id;
-
-    // Verify 50% LTV constraint: credit requires double its value in active vault assets
-    const { data: wallet, error: walletErr } = await supabase
-      .from("apex_wallets")
-      .select("available_balance")
-      .eq("user_id", user.id)
+    // 50% LTV: need 2× loan amount in balance
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("balance")
+      .eq("id", user.id)
       .single();
 
-    const availableBalance = wallet?.available_balance || 0;
-    const requiredVaultAssets = principal * 2;
+    const availableBalance = Number(profile?.balance || 0);
+    const requiredCollateral = principal * 2;
 
-    if (availableBalance < requiredVaultAssets) {
-      console.warn(
-        "[POST /api/loan] LTV constraint violation for user:",
-        user.id,
-        "Required:",
-        requiredVaultAssets,
-        "Available:",
-        availableBalance,
-      );
+    if (availableBalance < requiredCollateral)
       return NextResponse.json(
         {
           success: false,
-          error: `Requested credit requires $${requiredVaultAssets} in active vault assets. You have $${availableBalance} available.`,
+          error: `Requested credit requires $${requiredCollateral.toFixed(2)} in vault assets. You have $${availableBalance.toFixed(2)} available.`,
         },
         { status: 400 },
       );
-    }
 
-    // Create loan record
-    const { error: loanErr } = await supabase.from("apex_loans").insert([
+    // Annual rate 12%, total due = principal * 1.12
+    const interestRateAnnual = 12;
+    const totalDue = principal * 1.12;
+
+    // v3: loan_request — no escrow taken (admin disburses on approval)
+    const { error } = await supabase.from("apex_master_requests").insert([
       {
         user_id: user.id,
-        investment_id: activeInvestmentId,
+        request_type: "loan_request",
+        status: "pending",
         amount: principal,
-        status: "active",
+        meta_data: {
+          interest_rate_annual: interestRateAnnual,
+          total_due: totalDue,
+          investment_id: investments[0].id,
+        },
       },
     ]);
 
-    if (loanErr) {
-      console.error("[POST /api/loan] Failed to create loan:", loanErr);
-      throw loanErr;
-    }
+    if (error) throw error;
 
-    console.log(
-      "[POST /api/loan] Success for user:",
-      user.id,
-      "Amount:",
-      principal,
-      "Investment ID:",
-      activeInvestmentId,
-    );
-    return NextResponse.json(
-      { success: true, message: "Asset credit lines requested successfully." },
-      { status: 200 },
-    );
+    return NextResponse.json({
+      success: true,
+      message: "Asset credit line requested successfully.",
+    });
   } catch (error: any) {
-    console.error("[POST /api/loan] Server error:", error.message);
     return NextResponse.json(
       { success: false, error: error.message },
       { status: 500 },

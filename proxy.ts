@@ -48,26 +48,29 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
+  // ── ADMIN PATH CHECK ──────────────────────────────────────
   if (user && pathname.startsWith("/admin")) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("user_role")
+      .select("role") // 👈 Changed from user_role to role
       .eq("id", user.id)
       .single();
 
-    if (!profile || profile.user_role !== "admin") {
+    if (!profile || profile.role !== "admin") {
+      // 👈 Changed from user_role to role
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
+  // ── LOGIN PATH REDIRECT ───────────────────────────────────
   if (user && pathname === "/login") {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("user_role")
+      .select("role") // 👈 Changed from user_role to role
       .eq("id", user.id)
       .single();
 
-    const target = profile?.user_role === "admin" ? "/admin" : "/dashboard";
+    const target = profile?.role === "admin" ? "/admin" : "/dashboard"; // 👈 Changed from user_role to role
     return NextResponse.redirect(new URL(target, request.url));
   }
 

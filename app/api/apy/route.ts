@@ -29,28 +29,28 @@ export async function POST(req: NextRequest) {
     if (balance === undefined || apy === undefined) {
       return NextResponse.json(
         { error: "Missing required fields: balance and apy." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (typeof balance !== "number" || typeof apy !== "number") {
       return NextResponse.json(
         { error: "Fields balance and apy must be numbers." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (balance < 0) {
       return NextResponse.json(
         { error: "Balance cannot be negative." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (apy < 0 || apy > 100) {
       return NextResponse.json(
         { error: "APY must be between 0 and 100." },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -76,12 +76,11 @@ export async function POST(req: NextRequest) {
     };
 
     return NextResponse.json(response, { status: 200 });
-
   } catch (error) {
     console.error("[APY Route Error]", error);
     return NextResponse.json(
       { error: "Internal server error." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -90,6 +89,6 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   return NextResponse.json(
     { error: "Method not allowed. Use POST." },
-    { status: 405 }
+    { status: 405 },
   );
 }

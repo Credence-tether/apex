@@ -10,7 +10,8 @@ type Tab =
   | "loans"
   | "users"
   | "investments"
-  | "transactions";
+  | "transactions"
+  | "kyc";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -22,6 +23,7 @@ export default function AdminDashboard() {
     users: [],
     investments: [],
     transactions: [],
+    kyc: [],
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<Tab>("deposits");
@@ -39,10 +41,25 @@ export default function AdminDashboard() {
   }, []);
 
   async function loadAdminRecords() {
+    setLoading(true);
     const res = await fetch("/api/admin/actions");
     const json = await res.json();
-    if (json.success) setData(json.payload);
-    else if (json.error === "Unauthorized") router.push("/dashboard");
+    if (json.success) {
+      const payload = json.payload ?? {};
+      setData({
+        deposits: payload.deposits ?? [],
+        withdrawals: payload.withdrawals ?? [],
+        loans: payload.loans ?? [],
+        investments: payload.investments ?? [],
+        kyc: payload.kycRequests ?? [],
+        transactions: payload.transactions ?? [],
+        users: payload.users ?? [],
+      });
+    } else if (json.error === "Unauthorized") {
+      router.push("/dashboard");
+    } else {
+      showMsg(json.error || "Failed to load admin records", true);
+    }
     setLoading(false);
   }
 
@@ -62,7 +79,9 @@ export default function AdminDashboard() {
     if (json.success) {
       showMsg(json.message);
       loadAdminRecords();
-    } else showMsg(json.error, true);
+    } else {
+      showMsg(json.error, true);
+    }
     setActionLoading(null);
   }
 
@@ -91,7 +110,7 @@ export default function AdminDashboard() {
       active: "bg-blue-900/40 text-blue-400 border-blue-700/40",
       completed: "bg-teal-900/40 text-teal-400 border-teal-700/40",
     };
-    return `px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider ${map[status] || "bg-gray-900/40 text-gray-400 border-gray-700/40"}`;
+    return `px-2 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wider ${map[status] ?? "bg-gray-900/40 text-gray-400 border-gray-700/40"}`;
   };
 
   const tabs: { key: Tab; label: string; count?: number }[] = [
@@ -110,21 +129,27 @@ export default function AdminDashboard() {
       label: "Loans",
       count: data.loans.filter((l: any) => l.status === "pending").length,
     },
+    {
+      key: "kyc",
+      label: "KYC",
+      count: data.kyc.filter((k: any) => k.status === "pending").length,
+    },
     { key: "users", label: "Users" },
     { key: "investments", label: "Investments" },
     { key: "transactions", label: "Transactions" },
   ];
 
-  if (loading)
+  if (loading) {
     return (
       <div className="min-h-screen bg-[#03030a] text-red-400 flex items-center justify-center font-mono text-sm tracking-widest">
         LOADING ADMIN CONTROL BOARD...
       </div>
     );
+  }
 
   return (
     <div className="min-h-screen bg-[#03030a] text-gray-100 font-sans">
-      {/* HEADER */}
+      {/* ── HEADER ─────────────────────────────────────────────────────── */}
       <header className="border-b border-red-900/30 bg-[#06060f] px-8 py-4 flex justify-between items-center sticky top-0 z-10">
         <div>
           <h1 className="text-xl font-black text-red-500 tracking-widest uppercase">
@@ -137,7 +162,11 @@ export default function AdminDashboard() {
         <div className="flex items-center gap-3">
           {statusMsg.text && (
             <span
-              className={`text-xs px-3 py-1.5 rounded border ${statusMsg.isError ? "bg-red-950/40 text-red-400 border-red-700/40" : "bg-emerald-950/40 text-emerald-400 border-emerald-700/40"}`}
+              className={`text-xs px-3 py-1.5 rounded border ${
+                statusMsg.isError
+                  ? "bg-red-950/40 text-red-400 border-red-700/40"
+                  : "bg-emerald-950/40 text-emerald-400 border-emerald-700/40"
+              }`}
             >
               {statusMsg.text}
             </span>
@@ -160,10 +189,14 @@ export default function AdminDashboard() {
         </div>
       </header>
 
-      {/* STATS BAR */}
+      {/* ── STATS BAR ──────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-6 gap-px bg-[#1e1e38]/30 border-b border-[#1e1e38]/30">
         {[
-          { label: "Total Users", value: data.users.length },
+          {
+            label: "Total Users",
+            // FIX 1: users rows use profiles.id — .length is always accurate now
+            value: data.users.length,
+          },
           {
             label: "Pending Deposits",
             value: data.deposits.filter((d: any) => d.status === "pending")
@@ -182,8 +215,14 @@ export default function AdminDashboard() {
           },
           {
             label: "Active Investments",
-            value: data.investments.filter((i: any) => i.status === "active")
-              .length,
+            // v3: investments are 'approved' not 'active' — show both so nothing hides
+            value: data.investments.filter(
+              (i: any) => i.status === "approved" || i.status === "active",
+            ).length,
+          },
+          {
+            label: "Pending KYC",
+            value: data.kyc.filter((k: any) => k.status === "pending").length,
           },
           { label: "Total Transactions", value: data.transactions.length },
         ].map((stat) => (
@@ -197,13 +236,17 @@ export default function AdminDashboard() {
       </div>
 
       <div className="p-6 max-w-7xl mx-auto space-y-6">
-        {/* TABS */}
+        {/* ── TABS ───────────────────────────────────────────────────────── */}
         <div className="flex gap-1 flex-wrap">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded transition flex items-center gap-2 ${activeTab === tab.key ? "bg-red-900/30 text-red-400 border border-red-900/50" : "text-gray-500 hover:text-gray-300 border border-transparent"}`}
+              className={`px-4 py-2 text-xs font-bold uppercase tracking-wider rounded transition flex items-center gap-2 ${
+                activeTab === tab.key
+                  ? "bg-red-900/30 text-red-400 border border-red-900/50"
+                  : "text-gray-500 hover:text-gray-300 border border-transparent"
+              }`}
             >
               {tab.label}
               {tab.count !== undefined && tab.count > 0 && (
@@ -215,7 +258,7 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* DEPOSITS TAB */}
+        {/* ── DEPOSITS TAB ───────────────────────────────────────────────── */}
         {activeTab === "deposits" && (
           <section className="space-y-3">
             <h2 className="text-sm font-bold uppercase tracking-widest text-red-400">
@@ -245,9 +288,11 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                       <p className="text-gray-500 text-[10px] font-mono truncate">
-                        TxHash: {dep.transaction_hash}
+                        TxHash: {dep.transaction_hash || "—"}
                       </p>
                       <p className="text-gray-600 text-[10px] mt-0.5">
+                        {/* FIX 2: profiles is a nested object from the FK embed,
+                            not profiles[0] — .full_name is correct */}
                         User: {dep.profiles?.full_name || dep.user_id} ·{" "}
                         {new Date(dep.created_at).toLocaleString()}
                       </p>
@@ -257,12 +302,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() =>
                             doAction(
-                              {
-                                action: "approve_deposit",
-                                target_table: "apex_deposit_requests",
-                                target_id: dep.id,
-                                target_status: "approved",
-                              },
+                              { target_id: dep.id, target_status: "approved" },
                               dep.id + "-approve",
                             )
                           }
@@ -276,11 +316,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() =>
                             doAction(
-                              {
-                                target_table: "apex_deposit_requests",
-                                target_id: dep.id,
-                                target_status: "rejected",
-                              },
+                              { target_id: dep.id, target_status: "rejected" },
                               dep.id + "-reject",
                             )
                           }
@@ -298,7 +334,7 @@ export default function AdminDashboard() {
           </section>
         )}
 
-        {/* WITHDRAWALS TAB */}
+        {/* ── WITHDRAWALS TAB ────────────────────────────────────────────── */}
         {activeTab === "withdrawals" && (
           <section className="space-y-3">
             <h2 className="text-sm font-bold uppercase tracking-widest text-red-400">
@@ -328,7 +364,7 @@ export default function AdminDashboard() {
                         </span>
                       </div>
                       <p className="text-gray-500 text-[10px] font-mono truncate">
-                        To: {w.wallet_address}
+                        To: {w.wallet_address || "—"}
                       </p>
                       <p className="text-gray-600 text-[10px] mt-0.5">
                         User: {w.profiles?.full_name || w.user_id} ·{" "}
@@ -340,11 +376,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() =>
                             doAction(
-                              {
-                                target_table: "apex_withdrawals",
-                                target_id: w.id,
-                                target_status: "approved",
-                              },
+                              { target_id: w.id, target_status: "approved" },
                               w.id + "-approve",
                             )
                           }
@@ -358,11 +390,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() =>
                             doAction(
-                              {
-                                target_table: "apex_withdrawals",
-                                target_id: w.id,
-                                target_status: "rejected",
-                              },
+                              { target_id: w.id, target_status: "rejected" },
                               w.id + "-reject",
                             )
                           }
@@ -380,7 +408,7 @@ export default function AdminDashboard() {
           </section>
         )}
 
-        {/* LOANS TAB */}
+        {/* ── LOANS TAB ──────────────────────────────────────────────────── */}
         {activeTab === "loans" && (
           <section className="space-y-3">
             <h2 className="text-sm font-bold uppercase tracking-widest text-red-400">
@@ -420,11 +448,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() =>
                             doAction(
-                              {
-                                target_table: "apex_loans",
-                                target_id: loan.id,
-                                target_status: "approved",
-                              },
+                              { target_id: loan.id, target_status: "approved" },
                               loan.id + "-approve",
                             )
                           }
@@ -438,11 +462,7 @@ export default function AdminDashboard() {
                         <button
                           onClick={() =>
                             doAction(
-                              {
-                                target_table: "apex_loans",
-                                target_id: loan.id,
-                                target_status: "rejected",
-                              },
+                              { target_id: loan.id, target_status: "rejected" },
                               loan.id + "-reject",
                             )
                           }
@@ -460,7 +480,7 @@ export default function AdminDashboard() {
           </section>
         )}
 
-        {/* USERS TAB */}
+        {/* ── USERS TAB ──────────────────────────────────────────────────── */}
         {activeTab === "users" && (
           <section className="space-y-3">
             <h2 className="text-sm font-bold uppercase tracking-widest text-red-400">
@@ -474,6 +494,7 @@ export default function AdminDashboard() {
                   <thead>
                     <tr className="border-b border-[#1e1e38] text-[10px] text-gray-500 uppercase tracking-widest">
                       <th className="text-left py-3 px-2">Name</th>
+                      <th className="text-left py-3 px-2">Email</th>
                       <th className="text-left py-3 px-2">Role</th>
                       <th className="text-left py-3 px-2">KYC</th>
                       <th className="text-left py-3 px-2">Balance</th>
@@ -485,17 +506,26 @@ export default function AdminDashboard() {
                   <tbody>
                     {data.users.map((u: any) => (
                       <tr
-                        key={u.user_id}
+                        // FIX 3: v3 profiles PK is `id`, not `user_id`
+                        key={u.id}
                         className="border-b border-[#1e1e38]/40 hover:bg-white/5"
                       >
                         <td className="py-3 px-2 text-white font-medium">
                           {u.full_name || "—"}
                         </td>
+                        <td className="py-3 px-2 text-gray-400">
+                          {u.email || "—"}
+                        </td>
                         <td className="py-3 px-2">
+                          {/* FIX 4: v3 column is `role`, not `user_role` */}
                           <span
-                            className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${u.user_role === "admin" ? "bg-red-900/30 text-red-400 border-red-800/40" : "bg-gray-900/30 text-gray-400 border-gray-700/40"}`}
+                            className={`px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${
+                              u.role === "admin"
+                                ? "bg-red-900/30 text-red-400 border-red-800/40"
+                                : "bg-gray-900/30 text-gray-400 border-gray-700/40"
+                            }`}
                           >
-                            {u.user_role || "user"}
+                            {u.role || "user"}
                           </span>
                         </td>
                         <td className="py-3 px-2">
@@ -506,16 +536,11 @@ export default function AdminDashboard() {
                           </span>
                         </td>
                         <td className="py-3 px-2 text-white font-mono">
-                          $
-                          {Number(
-                            u.apex_wallets?.[0]?.available_balance || 0,
-                          ).toFixed(2)}
+                          {/* FIX 5: v3 balance lives directly on profiles, not apex_wallets[] */}
+                          ${Number(u.balance ?? 0).toFixed(2)}
                         </td>
                         <td className="py-3 px-2 text-[#00d1b2] font-mono">
-                          $
-                          {Number(
-                            u.apex_wallets?.[0]?.total_earnings || 0,
-                          ).toFixed(2)}
+                          ${Number(u.total_earnings ?? 0).toFixed(2)}
                         </td>
                         <td className="py-3 px-2 text-gray-500">
                           {new Date(u.created_at).toLocaleDateString()}
@@ -525,8 +550,8 @@ export default function AdminDashboard() {
                             onClick={() =>
                               setCreditModal({
                                 open: true,
-                                userId: u.user_id,
-                                userName: u.full_name || u.user_id,
+                                userId: u.id, // FIX 6: pass u.id not u.user_id
+                                userName: u.full_name || u.email || u.id,
                               })
                             }
                             className="bg-[#1e1e38] hover:bg-[#2a2a50] text-[#00d1b2] px-3 py-1 rounded text-[10px] font-bold uppercase tracking-wider transition"
@@ -543,7 +568,124 @@ export default function AdminDashboard() {
           </section>
         )}
 
-        {/* INVESTMENTS TAB */}
+        {/* ── KYC SUBMISSIONS TAB ───────────────────────────────────────────── */}
+        {activeTab === "kyc" && (
+          <section className="space-y-3">
+            <h2 className="text-sm font-bold uppercase tracking-widest text-red-400">
+              KYC Submissions
+            </h2>
+            {data.kyc.length === 0 ? (
+              <p className="text-gray-600 text-xs italic">
+                No KYC submissions have been received.
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="border-b border-[#1e1e38] text-[10px] text-gray-500 uppercase tracking-widest">
+                      <th className="text-left py-3 px-2">User</th>
+                      <th className="text-left py-3 px-2">Document</th>
+                      <th className="text-left py-3 px-2">Status</th>
+                      <th className="text-left py-3 px-2">Submitted</th>
+                      <th className="text-left py-3 px-2">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {data.kyc.map((request: any) => (
+                      <tr
+                        key={request.id}
+                        className="border-b border-[#1e1e38]/40 hover:bg-white/5"
+                      >
+                        <td className="py-3 px-2 text-gray-400">
+                          {request.profiles?.full_name ||
+                            request.user_id?.slice(0, 8) + "..."}
+                        </td>
+                        <td className="py-3 px-2 text-white">
+                          <div className="space-y-1 text-[11px]">
+                            <div>
+                              <span className="font-bold">Type:</span>{" "}
+                              {request.meta_data?.id_type || "—"}
+                            </div>
+                            <div>
+                              <span className="font-bold">Number:</span>{" "}
+                              {request.meta_data?.id_number || "—"}
+                            </div>
+                            {request.meta_data?.document_url && (
+                              <div>
+                                <a
+                                  href={request.meta_data.document_url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-[#00d1b2] underline"
+                                >
+                                  View document
+                                </a>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-3 px-2">
+                          <span className={statusBadge(request.status)}>
+                            {request.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2 text-gray-500">
+                          {new Date(request.created_at).toLocaleDateString()}
+                        </td>
+                        <td className="py-3 px-2">
+                          {request.status === "pending" ? (
+                            <div className="flex gap-1 flex-wrap">
+                              <button
+                                onClick={() =>
+                                  doAction(
+                                    {
+                                      target_id: request.id,
+                                      target_status: "approved",
+                                    },
+                                    request.id + "-approve",
+                                  )
+                                }
+                                disabled={
+                                  actionLoading === request.id + "-approve"
+                                }
+                                className="bg-emerald-700/80 hover:bg-emerald-600 text-white px-3 py-1 rounded font-bold uppercase text-[10px] tracking-wider disabled:opacity-50 transition"
+                              >
+                                Approve
+                              </button>
+                              <button
+                                onClick={() =>
+                                  doAction(
+                                    {
+                                      target_id: request.id,
+                                      target_status: "rejected",
+                                    },
+                                    request.id + "-reject",
+                                  )
+                                }
+                                disabled={
+                                  actionLoading === request.id + "-reject"
+                                }
+                                className="bg-red-950/60 hover:bg-red-900/60 text-red-400 border border-red-900/40 px-3 py-1 rounded font-bold uppercase text-[10px] tracking-wider disabled:opacity-50 transition"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          ) : (
+                            <span className="text-[10px] text-gray-400">
+                              No actions available
+                            </span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* ── INVESTMENTS TAB ────────────────────────────────────────────── */}
         {activeTab === "investments" && (
           <section className="space-y-3">
             <h2 className="text-sm font-bold uppercase tracking-widest text-red-400">
@@ -565,6 +707,7 @@ export default function AdminDashboard() {
                       <th className="text-left py-3 px-2">Progress</th>
                       <th className="text-left py-3 px-2">Status</th>
                       <th className="text-left py-3 px-2">Date</th>
+                      <th className="text-left py-3 px-2">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -578,13 +721,19 @@ export default function AdminDashboard() {
                             inv.user_id?.slice(0, 8) + "..."}
                         </td>
                         <td className="py-3 px-2 text-white font-medium">
-                          {inv.plan_name}
+                          {inv.plan_name || "—"}
                         </td>
                         <td className="py-3 px-2 text-white font-mono">
-                          ${Number(inv.amount_invested).toFixed(2)}
+                          $
+                          {Number(
+                            inv.amount_invested ?? inv.amount ?? 0,
+                          ).toFixed(2)}
                         </td>
                         <td className="py-3 px-2 text-[#00d1b2]">
-                          {(Number(inv.apy_percentage) * 100).toFixed(1)}%
+                          {inv.apy_percentage
+                            ? (Number(inv.apy_percentage) * 100).toFixed(1) +
+                              "%"
+                            : "—"}
                         </td>
                         <td className="py-3 px-2 text-gray-400">
                           {inv.weeks_elapsed || 0}/
@@ -598,6 +747,44 @@ export default function AdminDashboard() {
                         <td className="py-3 px-2 text-gray-500">
                           {new Date(inv.created_at).toLocaleDateString()}
                         </td>
+                        <td className="py-3 px-2">
+                          {inv.status === "pending" && (
+                            <div className="flex gap-1">
+                              <button
+                                onClick={() =>
+                                  doAction(
+                                    {
+                                      target_id: inv.id,
+                                      target_status: "approved",
+                                    },
+                                    inv.id + "-approve",
+                                  )
+                                }
+                                disabled={actionLoading === inv.id + "-approve"}
+                                className="bg-emerald-700/80 hover:bg-emerald-600 text-white px-3 py-1 rounded font-bold uppercase text-[10px] tracking-wider disabled:opacity-50 transition"
+                              >
+                                {actionLoading === inv.id + "-approve"
+                                  ? "..."
+                                  : "Approve"}
+                              </button>
+                              <button
+                                onClick={() =>
+                                  doAction(
+                                    {
+                                      target_id: inv.id,
+                                      target_status: "rejected",
+                                    },
+                                    inv.id + "-reject",
+                                  )
+                                }
+                                disabled={actionLoading === inv.id + "-reject"}
+                                className="bg-red-950/60 hover:bg-red-900/60 text-red-400 border border-red-900/40 px-3 py-1 rounded font-bold uppercase text-[10px] tracking-wider disabled:opacity-50 transition"
+                              >
+                                Reject
+                              </button>
+                            </div>
+                          )}
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -607,7 +794,7 @@ export default function AdminDashboard() {
           </section>
         )}
 
-        {/* TRANSACTIONS TAB */}
+        {/* ── TRANSACTIONS TAB ───────────────────────────────────────────── */}
         {activeTab === "transactions" && (
           <section className="space-y-3">
             <h2 className="text-sm font-bold uppercase tracking-widest text-red-400">
@@ -624,22 +811,19 @@ export default function AdminDashboard() {
                     <tr className="border-b border-[#1e1e38] text-[10px] text-gray-500 uppercase tracking-widest">
                       <th className="text-left py-3 px-2">User</th>
                       <th className="text-left py-3 px-2">Type</th>
-                      <th className="text-left py-3 px-2">Gross</th>
-                      <th className="text-left py-3 px-2">Net</th>
-                      <th className="text-left py-3 px-2">Fee</th>
+                      <th className="text-left py-3 px-2">Amount</th>
                       <th className="text-left py-3 px-2">Status</th>
-                      <th className="text-left py-3 px-2">Description</th>
                       <th className="text-left py-3 px-2">Date</th>
                     </tr>
                   </thead>
                   <tbody>
                     {data.transactions.map((txn: any) => {
-                      const isCredit = [
-                        "deposit",
-                        "disbursement",
-                        "payout",
-                        "admin_credit",
-                      ].includes(txn.type);
+                      // FIX 7: v3 has no `type` column — use `request_type`
+                      const requestType = txn.request_type ?? txn.type ?? "";
+                      const isCredit = ["deposit", "loan_request"].includes(
+                        requestType,
+                      );
+
                       return (
                         <tr
                           key={txn.id}
@@ -650,34 +834,22 @@ export default function AdminDashboard() {
                               txn.user_id?.slice(0, 8) + "..."}
                           </td>
                           <td className="py-3 px-2 text-white uppercase tracking-wide">
-                            {txn.type}
+                            {requestType.replace(/_/g, " ")}
                           </td>
                           <td
-                            className={`py-3 px-2 font-mono font-bold ${isCredit ? "text-[#00d1b2]" : "text-gray-400"}`}
+                            className={`py-3 px-2 font-mono font-bold ${
+                              isCredit ? "text-[#00d1b2]" : "text-gray-400"
+                            }`}
                           >
-                            {isCredit ? "+" : "-"}$
-                            {Number(
-                              txn.amount || txn.amount || 0,
-                            ).toFixed(2)}
-                          </td>
-                          <td className="py-3 px-2 font-mono text-gray-300">
-                            $
-                            {Number(txn.amount || txn.amount || 0).toFixed(
-                              2,
-                            )}
-                          </td>
-                          <td className="py-3 px-2 font-mono text-gray-500">
-                            ${Number(txn.fee || 0).toFixed(2)}
+                            {isCredit ? "+" : "−"}$
+                            {Number(txn.amount ?? 0).toFixed(2)}
                           </td>
                           <td className="py-3 px-2">
                             <span
-                              className={statusBadge(txn.status || "completed")}
+                              className={statusBadge(txn.status ?? "pending")}
                             >
-                              {txn.status || "completed"}
+                              {txn.status ?? "pending"}
                             </span>
-                          </td>
-                          <td className="py-3 px-2 text-gray-500 max-w-xs truncate">
-                            {txn.description || "—"}
                           </td>
                           <td className="py-3 px-2 text-gray-500">
                             {new Date(txn.created_at).toLocaleDateString()}
@@ -693,7 +865,7 @@ export default function AdminDashboard() {
         )}
       </div>
 
-      {/* CREDIT MODAL */}
+      {/* ── CREDIT MODAL ───────────────────────────────────────────────── */}
       {creditModal.open && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl p-6 w-full max-w-sm space-y-4">
