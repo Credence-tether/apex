@@ -103,7 +103,7 @@ export async function POST(request: Request) {
         user_id: user.id,
         request_type: "kyc_submission",
         status: "pending",
-        amount: 0,
+        amount: null,
         meta_data: {
           full_name: full_name || user.user_metadata?.full_name || "",
           id_type: id_type.trim(),
