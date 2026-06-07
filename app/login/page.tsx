@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
+  const [verified, setVerified] = useState(false); // ← new: show verification screen
   const envError = getSupabaseClientError();
   const supabase = createClient();
   const router = useRouter();
@@ -33,7 +34,6 @@ export default function LoginPage() {
     haveAcct:    de ? "Bereits registriert? " : "Already have an account? ",
     createLink:  de ? "Konto erstellen" : "Create Account",
     signInLink:  de ? "Hier anmelden" : "Sign In Here",
-    successMsg:  de ? "Registrierung erfolgreich! Bitte E-Mail bestätigen." : "Registration successful! Check your email for verification.",
   };
 
   const handleAuth = async (e: React.FormEvent) => {
@@ -51,7 +51,7 @@ export default function LoginPage() {
           },
         });
         if (error) setMessage(error.message);
-        else setMessage(T.successMsg);
+        else setVerified(true); // ← show verification screen
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) { setMessage(error.message); setLoading(false); return; }
@@ -66,8 +66,75 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  const isSuccess = message.toLowerCase().includes("successful") || message.toLowerCase().includes("erfolgreich");
+  // ── Verification pending screen ────────────────────────────────
+  if (verified) {
+    return (
+      <main style={{
+        minHeight:"100vh",background:"#050d1a",display:"flex",alignItems:"center",
+        justifyContent:"center",padding:"32px 16px",fontFamily:"'DM Sans',sans-serif",
+        position:"relative",overflow:"hidden",
+      }}>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Syne:wght@800&family=DM+Sans:wght@300;400;500;600&display=swap');`}</style>
+        <div style={{
+          width:"100%",maxWidth:420,
+          background:"rgba(10,22,40,0.9)",
+          border:"1px solid rgba(0,200,170,0.15)",
+          borderRadius:20,padding:"48px 36px 40px",
+          backdropFilter:"blur(16px)",
+          boxShadow:"0 32px 64px rgba(0,0,0,0.45)",
+          textAlign:"center",
+        }}>
+          {/* Icon */}
+          <div style={{
+            width:64,height:64,borderRadius:"50%",
+            background:"rgba(0,200,170,0.1)",
+            border:"1px solid rgba(0,200,170,0.25)",
+            display:"flex",alignItems:"center",justifyContent:"center",
+            margin:"0 auto 24px",fontSize:28,
+          }}>✉️</div>
 
+          <div style={{fontFamily:"'Syne',sans-serif",fontWeight:800,fontSize:22,color:"#00c8aa",letterSpacing:"0.1em",marginBottom:8}}>
+            CHECK YOUR EMAIL
+          </div>
+          <p style={{fontSize:14,color:"#6680a0",lineHeight:1.7,marginBottom:24}}>
+            We sent a verification link to<br/>
+            <strong style={{color:"#e8eef8"}}>{email}</strong>
+          </p>
+
+          <div style={{
+            background:"rgba(0,200,170,0.06)",
+            border:"1px solid rgba(0,200,170,0.15)",
+            borderRadius:12,padding:"16px 20px",
+            fontSize:13,color:"#94a3b8",lineHeight:1.7,
+            marginBottom:28,textAlign:"left",
+          }}>
+            <p style={{margin:"0 0 6px",color:"#00c8aa",fontWeight:600,fontSize:11,letterSpacing:"0.1em",textTransform:"uppercase"}}>What happens next</p>
+            <p style={{margin:0}}>1. Open the email from <strong style={{color:"#e8eef8"}}>support@apxfund.xyz</strong><br/>
+            2. Click the verification link<br/>
+            3. You'll be taken to your dashboard</p>
+          </div>
+
+          <p style={{fontSize:12,color:"#3d5070",marginBottom:16}}>
+            Didn't receive it? Check your spam folder.
+          </p>
+
+          <button
+            onClick={() => { setVerified(false); setIsRegistering(false); setMessage(""); }}
+            style={{
+              background:"none",border:"1px solid rgba(0,200,170,0.2)",
+              borderRadius:10,color:"#00c8aa",fontSize:13,fontWeight:500,
+              padding:"10px 24px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",
+              transition:"background .2s",
+            }}
+          >
+            Back to Sign In
+          </button>
+        </div>
+      </main>
+    );
+  }
+
+  // ── Normal login / register form ───────────────────────────────
   return (
     <main style={{
       minHeight:"100vh",background:"#050d1a",display:"flex",alignItems:"center",
@@ -110,9 +177,9 @@ export default function LoginPage() {
         {(message || envError) && (
           <div style={{
             padding:"12px 16px",borderRadius:10,fontSize:13,marginBottom:20,textAlign:"center",
-            background: isSuccess ? "rgba(0,200,120,0.1)" : "rgba(220,60,60,0.1)",
-            border: `1px solid ${isSuccess ? "rgba(0,200,120,0.25)" : "rgba(220,60,60,0.25)"}`,
-            color: isSuccess ? "#00c870" : "#ff7070",
+            background:"rgba(220,60,60,0.1)",
+            border:"1px solid rgba(220,60,60,0.25)",
+            color:"#ff7070",
           }}>
             {message || envError}
           </div>
@@ -158,3 +225,4 @@ export default function LoginPage() {
     </main>
   );
 }
+

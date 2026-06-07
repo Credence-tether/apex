@@ -1,21 +1,35 @@
 import { createClient } from "../../../utils/supabase/server";
 import { NextResponse } from "next/server";
+import { sendWelcomeEmail } from "@/emails";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
-  // Supabase recommends exchanging the full request URL so the library
-  // can parse state and PKCE details. Pass the full URL rather than only
-  // the `code` query param to ensure cookies / session tokens are set.
+
   try {
     const supabase = await createClient();
-    await supabase.auth.exchangeCodeForSession(request.url);
+    const { data, error } = await supabase.auth.exchangeCodeForSession(request.url);
+
+    if (!error && data?.user) {
+      const user = data.user;
+      const isNewUser = user.created_at === user.updated_at ||
+        (Date.now() - new Date(user.created_at).getTime()) < 30000;
+
+      if (isNewUser) {
+        const name =
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          user.email?.split("@")[0] ||
+          "Investor";
+
+        // Fire and forget — never block the redirect
+        sendWelcomeEmail({ to: user.email!, name }).catch((err) =>
+          console.error("[auth callback] welcome email failed:", err)
+        );
+      }
+    }
   } catch (err) {
-    // Log server-side; the client will still be redirected to dashboard
-    // where the app can surface an auth error message if needed.
-    // eslint-disable-next-line no-console
     console.error("[auth callback] exchangeCodeForSession error:", err);
   }
 
-  // URL to redirect to after sign up process completes
   return NextResponse.redirect(new URL("/dashboard", request.url));
 }
