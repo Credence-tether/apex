@@ -1,6 +1,9 @@
 import "./globals.css";
 import { Metadata } from "next";
+import { cookies } from "next/headers";
 import Navbar from "../components/Navbar";
+import { LocaleProvider } from "../lib/locale-context";
+import type { Locale } from "../lib/i18n";
 
 export const metadata: Metadata = {
   title: "Apex | High APY Crypto Wealth & Secured Asset Management",
@@ -17,16 +20,22 @@ export const metadata: Metadata = {
   robots: "index, follow",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const cookieStore = await cookies();
+  const localeCookie = cookieStore.get("apex-locale")?.value;
+  const serverLocale: Locale = localeCookie === "de" ? "de" : "en";
+
   return (
-    <html lang="en" className="scroll-smooth">
+    <html lang={serverLocale} className="scroll-smooth">
       <body className="bg-[#060613] text-gray-100 antialiased">
-        <Navbar />
-        {children}
+        <LocaleProvider serverLocale={serverLocale}>
+          <Navbar />
+          {children}
+        </LocaleProvider>
       </body>
     </html>
   );

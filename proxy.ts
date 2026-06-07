@@ -1,9 +1,27 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+const GERMAN_COUNTRIES = ["DE", "AT", "CH"];
+
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // ── LOCALE DETECTION ─────────────────────────────────────
+  const country =
+    request.headers.get("x-vercel-ip-country") ||
+    request.headers.get("cf-ipcountry") ||
+    "";
+  const isGerman = GERMAN_COUNTRIES.includes(country.toUpperCase());
+  const existingLocale = request.cookies.get("apex-locale")?.value;
+  if (!existingLocale) {
+    response.cookies.set("apex-locale", isGerman ? "de" : "en", {
+      maxAge: 60 * 60 * 24 * 30,
+      path: "/",
+      sameSite: "lax",
+    });
+  }
+
+  // ── SUPABASE AUTH ─────────────────────────────────────────
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -14,15 +32,23 @@ export async function proxy(request: NextRequest) {
         },
         setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) =>
-            request.cookies.set(name, value),
+            request.cookies.set(name, value)
           );
           response = NextResponse.next({ request });
+          // Re-apply locale cookie after response recreation
+          if (!existingLocale) {
+            response.cookies.set("apex-locale", isGerman ? "de" : "en", {
+              maxAge: 60 * 60 * 24 * 30,
+              path: "/",
+              sameSite: "lax",
+            });
+          }
           cookiesToSet.forEach(({ name, value, options }) =>
-            response.cookies.set(name, value, options),
+            response.cookies.set(name, value, options)
           );
         },
       },
-    },
+    }
   );
 
   const {
@@ -39,38 +65,37 @@ export async function proxy(request: NextRequest) {
     "/security",
     "/terms",
     "/auth/callback",
+    "/faq",
+    "/risk",
+    "/privacy",
+    "/contact",
   ];
   const isPublic = publicPaths.some(
-    (p) => pathname === p || pathname.startsWith("/api/"),
+    (p) => pathname === p || pathname.startsWith("/api/")
   );
 
   if (!user && !isPublic) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  // ── ADMIN PATH CHECK ──────────────────────────────────────
   if (user && pathname.startsWith("/admin")) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role") // 👈 Changed from user_role to role
+      .select("role")
       .eq("id", user.id)
       .single();
-
     if (!profile || profile.role !== "admin") {
-      // 👈 Changed from user_role to role
       return NextResponse.redirect(new URL("/dashboard", request.url));
     }
   }
 
-  // ── LOGIN PATH REDIRECT ───────────────────────────────────
   if (user && pathname === "/login") {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role") // 👈 Changed from user_role to role
+      .select("role")
       .eq("id", user.id)
       .single();
-
-    const target = profile?.role === "admin" ? "/admin" : "/dashboard"; // 👈 Changed from user_role to role
+    const target = profile?.role === "admin" ? "/admin" : "/dashboard";
     return NextResponse.redirect(new URL(target, request.url));
   }
 
