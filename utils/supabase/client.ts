@@ -56,3 +56,12 @@ export function createClient() {
 
   return createBrowserClient(SUPABASE_URL!, SUPABASE_KEY!);
 }
+
+export async function checkAndRefreshSession() {
+  const client = createClient();
+  const { data: { session }, error } = await client.auth.getSession();
+  if (error || !session) {
+    await client.auth.signOut();
+    window.location.href = "/login";
+  }
+}

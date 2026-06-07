@@ -26,6 +26,7 @@ export default function ContactContent() {
   return (
     <main className="min-h-screen bg-[#060613] text-gray-100">
       <div className="max-w-lg mx-auto px-4 py-16 space-y-8">
+
         <header className="text-center space-y-3">
           <p className="text-xs text-[#00d1b2] font-mono uppercase tracking-[0.3em]">
             {de ? "Beratung" : "Advisory Desk"}
@@ -38,6 +39,31 @@ export default function ContactContent() {
           </p>
         </header>
 
+        {/* Live Support Banner */}
+        <div className="bg-[#0a1a14] border border-[#00d1b2]/20 rounded-xl p-4 flex items-center gap-4">
+          <div className="relative flex-shrink-0">
+            <div className="w-3 h-3 rounded-full bg-[#00d1b2]" />
+            <div className="w-3 h-3 rounded-full bg-[#00d1b2] absolute top-0 left-0 animate-ping opacity-60" />
+          </div>
+          <div>
+            <p className="text-xs text-[#00d1b2] font-mono uppercase tracking-widest mb-0.5">
+              {de ? "Live-Support verfügbar" : "Live Support Available"}
+            </p>
+            <p className="text-xs text-gray-400">
+              {de
+                ? "Unser Team ist online und antwortet in der Regel innerhalb weniger Minuten."
+                : "Our team is online and typically responds within minutes."}
+            </p>
+          </div>
+          <a
+            href="mailto:support@apxfund.xyz"
+            className="ml-auto flex-shrink-0 bg-[#00d1b2] text-[#060613] text-xs font-bold px-3 py-2 rounded-lg hover:opacity-90 transition-opacity whitespace-nowrap"
+          >
+            {de ? "Jetzt chatten" : "Chat Now"}
+          </a>
+        </div>
+
+        {/* Contact Form */}
         <form onSubmit={handleSubmit} className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl p-6 space-y-5">
           <div>
             <label className="block text-xs text-gray-400 uppercase tracking-widest mb-2">{de ? "Vollständiger Name" : "Full Name"}</label>
@@ -59,11 +85,56 @@ export default function ContactContent() {
           {status && <p className={`text-sm text-center ${status.includes("Error") || status.includes("Fehler") || status.includes("Netzwerk") ? "text-red-400" : "text-[#00d1b2]"}`}>{status}</p>}
         </form>
 
-        <div className="text-center text-xs text-gray-600 space-y-1">
-          <p>{de ? "Sicherheitsprobleme melden:" : "Security issues:"} <a href="mailto:security@apexasset.io" className="text-[#00d1b2]">security@apexasset.io</a></p>
-          <p>{de ? "Allgemeine Anfragen:" : "General:"} <a href="mailto:support@apexasset.io" className="text-[#00d1b2]">support@apexasset.io</a></p>
+        {/* Contact Details */}
+        <div className="bg-[#0f0f30] border border-[#1e1e38] rounded-xl p-5 space-y-4">
+          <p className="text-xs text-gray-500 uppercase tracking-widest font-mono">
+            {de ? "Kontaktinformationen" : "Contact Information"}
+          </p>
+
+          <div className="flex items-start gap-3">
+            <span className="text-[#00d1b2] text-base mt-0.5">✉</span>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{de ? "Allgemeine Anfragen" : "General Support"}</p>
+              <a href="mailto:support@apxfund.xyz" className="text-sm text-[#00d1b2] hover:underline">support@apxfund.xyz</a>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <span className="text-[#00d1b2] text-base mt-0.5">🔒</span>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{de ? "Sicherheitsprobleme" : "Security Issues"}</p>
+              <a href="mailto:support@apxfund.xyz" className="text-sm text-[#00d1b2] hover:underline">support@apxfund.xyz</a>
+            </div>
+          </div>
+
+          <div className="h-px bg-[#1e1e38]" />
+
+          <div className="flex items-start gap-3">
+            <span className="text-[#00d1b2] text-base mt-0.5">📍</span>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{de ? "Büro" : "Office"}</p>
+              <p className="text-sm text-gray-300">
+                Apex Asset Management<br />
+                Forbury Rd<br />
+                Reading RG1 1AX<br />
+                {de ? "Vereinigtes Königreich" : "United Kingdom"}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-start gap-3">
+            <span className="text-[#00d1b2] text-base mt-0.5">🕐</span>
+            <div>
+              <p className="text-xs text-gray-500 uppercase tracking-wider mb-0.5">{de ? "Geschäftszeiten" : "Business Hours"}</p>
+              <p className="text-sm text-gray-300">
+                {de ? "Mo–Fr: 9:00–18:00 GMT" : "Mon–Fri: 9:00 AM – 6:00 PM GMT"}
+              </p>
+            </div>
+          </div>
         </div>
+
       </div>
     </main>
   );
 }
+

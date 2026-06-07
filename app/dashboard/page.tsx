@@ -223,6 +223,7 @@ export default function DashboardPage() {
   const [investAmount, setInvestAmount] = useState("");
   const [investPlan, setInvestPlan] = useState("Amateur Growth (7.8%)");
   const [investApy, setInvestApy] = useState("0.078");
+  const [showPlanModal, setShowPlanModal] = useState<string | null>(null);
   const [kycRequests, setKycRequests] = useState<any[]>([]);
   const [kycModalOpen, setKycModalOpen] = useState(false);
   const [kycIdType, setKycIdType] = useState("Passport");
@@ -266,6 +267,13 @@ export default function DashboardPage() {
     },
   ];
 
+
+  const PLAN_INFO: Record<string, {name:string;apy:string;minDeposit:string;lockPeriod:string;withdrawal:string;payoutSchedule:string;creditLine:string;ideal:string;terms:string[]}> = {
+    "0.052":{name:"Stable-Tier Entry",apy:"5.2% APY",minDeposit:"$300",lockPeriod:"No lock-in period",withdrawal:"Withdraw anytime after 7 days. Processed within 24–72 hours.",payoutSchedule:"Weekly — every Friday",creditLine:"Not available on this tier",ideal:"First-time investors seeking stable, low-risk digital yield.",terms:["Minimum investment: $300","No lock-in — withdraw after 7 days","Weekly yield every Friday","Early withdrawal before 7 days forfeits that week's earnings","APY fixed at 5.2%","Reinvestment available anytime"]},
+    "0.078":{name:"Amateur Growth",apy:"7.8% APY",minDeposit:"$300",lockPeriod:"14-day soft lock",withdrawal:"Withdraw after 14 days. Processed within 24–72 hours.",payoutSchedule:"Weekly — every Friday",creditLine:"50% LTV credit line eligible after 30 days",ideal:"Investors wanting consistent growth with credit-backed liquidity.",terms:["Minimum investment: $300","14-day soft lock from investment date","Weekly yield every Friday","Early exit before 14 days incurs 1.5% fee","APY fixed at 7.8%","Credit line after 30 days at 50% LTV, 4.5% origination rate","Collateral earns yield while credit line is active"]},
+    "0.114":{name:"Apex Thrive",apy:"11.4% APY",minDeposit:"$1,000",lockPeriod:"30-day soft lock",withdrawal:"Withdraw after 30 days. Priority processing within 24 hours.",payoutSchedule:"Weekly — every Friday",creditLine:"50% LTV credit line after 14 days",ideal:"Growth-focused investors seeking high yield with institutional credit access.",terms:["Minimum investment: $1,000","30-day soft lock from investment date","Weekly yield every Friday","Early exit before 30 days incurs 2.5% fee","APY fixed at 11.4%","Credit line after 14 days at 50% LTV","Priority 24-hour withdrawal processing","Collateral earns yield while credit line is active"]},
+    "0.156":{name:"Institutional",apy:"15.6% APY",minDeposit:"$5,000",lockPeriod:"60-day soft lock",withdrawal:"Withdraw after 60 days. Priority 24-hour processing.",payoutSchedule:"Weekly — every Friday",creditLine:"Immediate 50% LTV credit line upon investment",ideal:"High-net-worth investors seeking maximum yield with premium liquidity.",terms:["Minimum investment: $5,000","60-day soft lock from investment date","Weekly yield every Friday","Early exit before 60 days incurs 3.5% fee","APY fixed at 15.6%","Immediate credit line at 50% LTV","Priority 24-hour withdrawals","Dedicated account manager","Collateral earns yield while credit line is active"]},
+  };
   const balance = Number(profile?.balance || 0);
   const lockedCollateral = Number(profile?.locked_collateral || 0);
   const totalEarnings = Number(profile?.total_earnings || 0);

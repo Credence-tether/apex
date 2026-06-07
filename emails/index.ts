@@ -24,7 +24,7 @@ import {
   adminAlertEmail,
 } from "./templates/templates";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const getResend = () => new Resend(process.env.RESEND_API_KEY);
 
 const FROM = "Apex Asset Management <support@apxfund.xyz>";
 const ADMIN = process.env.ADMIN_EMAIL || "support@apxfund.xyz";
@@ -49,7 +49,7 @@ function genRef(prefix: string): string {
 // 1. WELCOME
 // ─────────────────────────────────────────────────────────
 export async function sendWelcomeEmail({ to, name }: { to: string; name: string }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `Welcome to Apex Asset Management, ${name}`,
@@ -70,7 +70,7 @@ export async function sendKycSubmittedEmail({
   documentType?: string;
 }) {
   const submissionId = genRef("KYC");
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: "KYC Documents Received — Under Review",
@@ -95,7 +95,7 @@ export async function sendKycApprovedEmail({
   name: string;
   submissionId?: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: "✅ KYC Approved — Your Account is Fully Verified",
@@ -121,7 +121,7 @@ export async function sendKycRejectedEmail({
   reason: string;
   submissionId?: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: "Action Required — KYC Verification Could Not Be Completed",
@@ -148,7 +148,7 @@ export async function sendDepositSubmittedEmail({
   method?: string;
 }) {
   const reference = genRef("DEP");
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: `Deposit of ${fmt(amount)} Received — Pending Confirmation`,
@@ -190,7 +190,7 @@ export async function sendDepositApprovedEmail({
   newBalance: number;
   reference?: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `✅ ${fmt(amount)} Credited — Your Deposit is Confirmed`,
@@ -227,7 +227,7 @@ export async function sendInvestmentConfirmedEmail({
   const nextFriday = new Date();
   nextFriday.setDate(nextFriday.getDate() + ((5 - nextFriday.getDay() + 7) % 7 || 7));
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `Investment Active — Earning ${apy}% APY`,
@@ -263,7 +263,7 @@ export async function sendWithdrawalSubmittedEmail({
   const reference = genRef("WDR");
   const truncated = walletAddress.slice(0, 6) + "..." + walletAddress.slice(-4);
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: `Withdrawal of ${fmt(amount)} Submitted — Processing`,
@@ -309,7 +309,7 @@ export async function sendWithdrawalApprovedEmail({
   txHash: string;
   reference?: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `💸 Payout Sent — ${fmt(amount)} Dispatched to Your Wallet`,
@@ -341,7 +341,7 @@ export async function sendCreditLineSubmittedEmail({
   const applicationId = genRef("LN");
   const ltv = Math.round((requested / collateral) * 100);
 
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: "Credit Line Application Received — Under Review",
@@ -383,7 +383,7 @@ export async function sendCreditLineApprovedEmail({
   amount: number;
   applicationId?: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `✅ Credit Line Approved — ${fmt(amount)} Disbursed`,
@@ -418,7 +418,7 @@ export async function sendWeeklyRoiEmail({
   const nextFriday = new Date();
   nextFriday.setDate(nextFriday.getDate() + ((5 - nextFriday.getDay() + 7) % 7 || 7));
 
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to,
     subject: `📈 Your Weekly Earnings — ${fmt(totalEarned)} Distributed`,
@@ -453,7 +453,7 @@ export async function sendContactAutoReply({
   subject: string;
 }) {
   const ticketId = genRef("TKT");
-  await resend.emails.send({
+  await getResend().emails.send({
     from: FROM,
     to,
     subject: `We received your message — Ticket #${ticketId}`,
@@ -493,7 +493,7 @@ export async function sendAdminAlert({
   reference: string;
   adminUrl?: string;
 }) {
-  return resend.emails.send({
+  return getResend().emails.send({
     from: FROM,
     to: ADMIN,
     subject: `[APEX ADMIN] New ${eventType} — ${reference}`,

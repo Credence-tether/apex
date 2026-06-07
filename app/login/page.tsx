@@ -12,7 +12,27 @@ export default function LoginPage() {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
-  const [verified, setVerified] = useState(false); // ← new: show verification screen
+  const [verified, setVerified] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const [resendMsg, setResendMsg] = useState("");
+
+  const handleResend = async () => {
+    setResendLoading(true);
+    setResendMsg("");
+    try {
+      const { error } = await supabase.auth.resend({ type: "signup", email });
+      if (error) setResendMsg(error.message);
+      else {
+        setResendMsg("Verification email resent!");
+        setResendCooldown(60);
+        const t = setInterval(() => {
+          setResendCooldown(c => { if (c <= 1) { clearInterval(t); return 0; } return c - 1; });
+        }, 1000);
+      }
+    } catch { setResendMsg("Failed to resend."); }
+    setResendLoading(false);
+  }; // ← new: show verification screen
   const envError = getSupabaseClientError();
   const supabase = createClient();
   const router = useRouter();
@@ -119,16 +139,28 @@ export default function LoginPage() {
           </p>
 
           <button
+            onClick={handleResend}
+            disabled={resendCooldown > 0 || resendLoading}
+            style={{
+              width:"100%",background:"#00c8aa",border:"none",
+              borderRadius:10,color:"#060d1a",fontSize:13,fontWeight:700,
+              padding:"12px 24px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",
+              marginBottom:10,opacity:(resendCooldown > 0 || resendLoading) ? 0.5 : 1,
+            }}
+          >
+            {resendLoading ? "Sending..." : resendCooldown > 0 ? `Resend in ${resendCooldown}s` : "Resend Verification Email"}
+          </button>
+          <button
             onClick={() => { setVerified(false); setIsRegistering(false); setMessage(""); }}
             style={{
-              background:"none",border:"1px solid rgba(0,200,170,0.2)",
+              width:"100%",background:"none",border:"1px solid rgba(0,200,170,0.2)",
               borderRadius:10,color:"#00c8aa",fontSize:13,fontWeight:500,
               padding:"10px 24px",cursor:"pointer",fontFamily:"'DM Sans',sans-serif",
-              transition:"background .2s",
             }}
           >
             Back to Sign In
           </button>
+          {resendMsg && <p style={{fontSize:12,color:"#00c8aa",textAlign:"center",marginTop:8}}>{resendMsg}</p>}
         </div>
       </main>
     );
